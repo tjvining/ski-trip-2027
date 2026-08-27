@@ -1,0 +1,2167 @@
+<title>Ski Trip 2027</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef1f3; --surface:#ffffff; --surface-2:#f7f8fa; --border:#d7dde2;
+    --text:#1a2226; --text-muted:#5c6b74;
+    --accent:#d9560f; --accent-ink:#ffffff;
+    --good:#1f8a4c; --good-bg:#e5f4ea;
+    --bad:#c23b3b; --bad-bg:#fbe9e9;
+    --radius:8px;
+    --font-ui:"IBM Plex Sans",system-ui,sans-serif;
+    --font-head:"IBM Plex Sans Condensed",system-ui,sans-serif;
+    --font-poster:"Bebas Neue","IBM Plex Sans Condensed",system-ui,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+    --sky-top:#bcd8ec; --sky-bottom:#fbe0c4; --sky-sun:#ffd27a;
+    --mtn-back:#c9d6de; --mtn-mid:#9fb0bc; --mtn-front:#54697c; --snow:#ffffff;
+    --pine:#3f6b4a;
+  }
+  :root[data-theme="dark"],
+  :root:not([data-theme="light"]){
+    --bg:#12161a; --surface:#1a1f24; --surface-2:#20262c; --border:#2b333a;
+    --text:#e7ecef; --text-muted:#93a1ab;
+    --accent:#ff7a3d; --accent-ink:#1a1006;
+    --good:#3ecb76; --good-bg:#153621;
+    --bad:#ff6b6b; --bad-bg:#3a1c1c;
+    --sky-top:#0c1220; --sky-bottom:#3d2b40; --sky-sun:#f2c879;
+    --mtn-back:#242c37; --mtn-mid:#1a2029; --mtn-front:#0e131a; --snow:#4b4258;
+    --pine:#28422f;
+  }
+  :root[data-theme="light"]{
+    --bg:#eef1f3; --surface:#ffffff; --surface-2:#f7f8fa; --border:#d7dde2;
+    --text:#1a2226; --text-muted:#5c6b74;
+    --accent:#d9560f; --accent-ink:#ffffff;
+    --good:#1f8a4c; --good-bg:#e5f4ea;
+    --bad:#c23b3b; --bad-bg:#fbe9e9;
+    --sky-top:#bcd8ec; --sky-bottom:#fbe0c4; --sky-sun:#ffd27a;
+    --mtn-back:#c9d6de; --mtn-mid:#9fb0bc; --mtn-front:#54697c; --snow:#ffffff;
+    --pine:#3f6b4a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font-ui);
+    font-size:15px; line-height:1.5; min-height:100vh;
+  }
+  h1,h2,h3{font-family:var(--font-poster); font-weight:400; text-wrap:balance; margin:0; letter-spacing:.02em;}
+  h1,h2{text-transform:uppercase; letter-spacing:.05em;}
+  button,input,select,textarea{font-family:inherit; font-size:inherit; color:inherit;}
+  .mono{font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
+  a{color:var(--accent);}
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px 20px; border-bottom:1px solid var(--border); background:
+      radial-gradient(circle, var(--border) 1px, transparent 1px) 0 0/16px 16px,
+      var(--surface);
+    background-blend-mode:normal;
+    position:sticky; top:0; z-index:10; flex-wrap:wrap;
+  }
+  .topbar h1{font-size:26px;}
+  .topbar .sub{color:var(--text-muted); font-size:12px; text-transform:uppercase; letter-spacing:0.06em;}
+  .topbar-right{display:flex; align-items:center; gap:10px;}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand .mark{flex:none;}
+
+  .chip{
+    display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
+    background:var(--surface-2); border:1px solid var(--border); font-size:13px; cursor:pointer;
+  }
+  .avatar{
+    width:22px; height:22px; border-radius:50%; background:var(--accent); color:var(--accent-ink);
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex:none;
+  }
+  .iconbtn{
+    width:32px; height:32px; border-radius:6px; border:1px solid var(--border); background:var(--surface-2);
+    cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px;
+  }
+  .iconbtn:hover, .chip:hover{border-color:var(--accent);}
+
+  nav.tabs{
+    display:flex; gap:2px; padding:0 20px; border-bottom:1px solid var(--border); background:var(--surface);
+    overflow-x:auto; position:relative; z-index:1;
+  }
+  nav.tabs button{
+    background:none; border:none; padding:12px 14px; cursor:grab; color:var(--text-muted);
+    font-weight:600; font-size:13.5px; border-bottom:2px solid transparent; white-space:nowrap;
+  }
+  nav.tabs button.active{color:var(--text); border-bottom-color:var(--accent);}
+  nav.tabs button.dragging{opacity:.4; cursor:grabbing;}
+  nav.tabs button:hover{color:var(--text);}
+
+  main{max-width:920px; margin:0 auto; padding:24px 20px 80px; position:relative; z-index:1;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px; gap:10px; flex-wrap:wrap;}
+  .section-head h2{font-size:26px;}
+  .section-head p{color:var(--text-muted); font-size:13px; margin:2px 0 0;}
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; margin-bottom:10px;
+  }
+  .stack{display:flex; flex-direction:column; gap:10px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  @media (max-width:640px){.grid2{grid-template-columns:1fr;}}
+
+  .vote-row{display:flex; align-items:center; gap:12px;}
+  .drag-handle{color:var(--text-muted); cursor:grab; font-size:15px; line-height:1; flex:none; touch-action:none;}
+  .drag-handle:active{cursor:grabbing;}
+  [data-drag-id].dragging{opacity:.4;}
+  [data-drag-id].drag-over{box-shadow:0 -2px 0 0 var(--accent);}
+  .vote-row .info{flex:1; min-width:0;}
+  .vote-row .name{font-weight:600; font-size:15.5px;}
+  .vote-row .meta{color:var(--text-muted); font-size:12.5px; margin-top:2px;}
+  .vote-row .meta a{color:inherit; text-decoration:underline;}
+
+  .votebtn{
+    display:flex; flex-direction:column; align-items:center; gap:2px; min-width:52px;
+    padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--surface-2);
+    cursor:pointer; font-weight:700;
+  }
+  .votebtn .count{font-size:16px; font-family:var(--font-mono);}
+  .votebtn .label{font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em;}
+  .votebtn.voted{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+  .votebtn.voted .label{color:var(--accent-ink); opacity:.85;}
+
+  .avatars{display:flex; margin-top:6px;}
+  .avatars .avatar{margin-right:-6px; border:2px solid var(--surface); width:20px; height:20px; font-size:10px;}
+
+  .ghost-btn{
+    background:none; border:1px dashed var(--border); color:var(--text-muted); border-radius:var(--radius);
+    padding:10px; cursor:pointer; font-weight:600; font-size:13.5px; width:100%; text-align:center;
+  }
+  .ghost-btn:hover{border-color:var(--accent); color:var(--accent);}
+
+  .btn{
+    background:var(--accent); color:var(--accent-ink); border:none; border-radius:6px;
+    padding:9px 14px; font-weight:600; font-size:13.5px; cursor:pointer;
+  }
+  .btn.secondary{background:var(--surface-2); color:var(--text); border:1px solid var(--border);}
+  .btn.small{padding:5px 9px; font-size:12px;}
+  .btn:disabled{opacity:.5; cursor:default;}
+
+  .row-actions{display:flex; gap:6px; flex:none;}
+  .icon-only{background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px; padding:4px 6px;}
+  .icon-only:hover{color:var(--bad);}
+
+  label{display:block; font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.03em;}
+  input[type=text],input[type=number],input[type=date],input[type=url],input[type=password],textarea,select{
+    width:100%; padding:8px 10px; border-radius:6px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--text);
+  }
+  textarea{font-family:inherit; line-height:1.45; resize:vertical;}
+  .field{margin-bottom:10px;}
+  fieldset{border:none; padding:0; margin:0;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th,td{text-align:left; padding:8px 6px; border-bottom:1px solid var(--border);}
+  th{color:var(--text-muted); font-size:11px; text-transform:uppercase; letter-spacing:.04em; font-weight:600;}
+  .amt{font-family:var(--font-mono); font-variant-numeric:tabular-nums; text-align:right;}
+
+  .balance-pill{
+    padding:2px 8px; border-radius:999px; font-family:var(--font-mono); font-weight:600; font-size:12.5px;
+  }
+  .balance-pill.owed{background:var(--good-bg); color:var(--good);}
+  .balance-pill.owes{background:var(--bad-bg); color:var(--bad);}
+  .balance-pill.even{background:var(--surface-2); color:var(--text-muted);}
+
+  .settle-row{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .settle-chip{
+    font-size:11px; padding:3px 9px; border-radius:999px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--text-muted); cursor:pointer; font-weight:600;
+  }
+  .settle-chip:hover{border-color:var(--accent);}
+  .settle-chip.settled{background:var(--good-bg); color:var(--good); border-color:var(--good);}
+
+  .comment-zone{margin-top:2px;}
+  .comment-toggle{background:none; border:none; color:var(--text-muted); font-size:12px; cursor:pointer; padding:8px 0 0; text-align:left; font-weight:600;}
+  .comment-toggle:hover{color:var(--accent);}
+  .comment-thread{margin-top:8px; padding-top:10px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px;}
+  .comment-item{display:flex; gap:8px; align-items:flex-start;}
+  .comment-body{flex:1; font-size:13px; line-height:1.4;}
+  .comment-who{font-weight:600; font-size:13px;}
+  .comment-when{color:var(--text-muted); font-size:11px; margin-left:6px;}
+  .comment-input-row{display:flex; gap:6px;}
+  .comment-input-row input{flex:1;}
+
+  .countdown-card{display:flex; align-items:center; gap:20px; padding:22px 24px; margin-bottom:16px; background:var(--accent); border:none;}
+  .countdown-big{font-size:56px; font-weight:400; color:var(--accent-ink); line-height:1; flex:none; font-family:var(--font-poster);}
+  .countdown-copy{display:flex; flex-direction:column; gap:3px; min-width:0;}
+  .countdown-label{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent-ink); opacity:.8; font-weight:700;}
+  .countdown-small{font-size:15px; color:var(--accent-ink); font-weight:600;}
+  @media (max-width:480px){.countdown-big{font-size:36px;}}
+
+  .stats-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  @media (max-width:640px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+  .stat-tile{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px;}
+  .stat-value{font-size:19px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .stat-label{font-size:10.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; margin-top:3px;}
+
+  .presence-widget{
+    position:fixed; right:16px; bottom:16px; z-index:50;
+    display:flex; align-items:center; gap:8px; padding:8px 14px 8px 10px;
+    background:var(--surface); border:1px solid var(--border); border-radius:999px;
+    box-shadow:0 4px 16px rgba(0,0,0,.18); font-size:12.5px; font-weight:600; color:var(--text-muted);
+  }
+  .presence-dot{width:8px; height:8px; border-radius:50%; background:var(--good); flex:none; box-shadow:0 0 0 3px var(--good-bg); animation:presence-pulse 2s infinite;}
+  @media (prefers-reduced-motion: reduce){.presence-dot{animation:none;}}
+  @keyframes presence-pulse{0%,100%{opacity:1;} 50%{opacity:.5;}}
+  .presence-avatars{display:flex;}
+  .presence-avatars .avatar{width:20px; height:20px; font-size:9px; margin-right:-6px; border:2px solid var(--surface);}
+  .presence-label{white-space:nowrap;}
+  @media (max-width:520px){.presence-widget .presence-label{display:none;}}
+
+  .balance-card{padding:0; overflow:hidden;}
+  .balance-row{display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer;}
+  .balance-info{flex:1; min-width:0;}
+  .balance-name{font-weight:600; font-size:14.5px;}
+  .balance-sub{color:var(--text-muted); font-size:12px; margin-top:1px;}
+  .balance-caret{color:var(--text-muted); font-size:11px; flex:none;}
+  .balance-breakdown{padding:4px 16px 14px 58px; display:flex; flex-direction:column; gap:6px; border-top:1px solid var(--border); margin-top:0;}
+  .breakdown-row{display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding-top:8px;}
+  .breakdown-desc{color:var(--text-muted);}
+  .breakdown-role{opacity:.75;}
+  .breakdown-amt{font-weight:600; flex:none;}
+  .breakdown-amt.owed{color:var(--good);}
+  .breakdown-amt.owes{color:var(--bad);}
+
+  .flow-card{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border);}
+  .flow-card:last-child{border-bottom:none;}
+  .flow-name{font-size:13.5px; font-weight:600;}
+  .flow-arrow{color:var(--text-muted); font-size:15px;}
+  .flow-amount{margin-left:auto; font-weight:700; font-size:15px; color:var(--accent);}
+
+  .empty{color:var(--text-muted); font-size:13.5px; padding:18px; text-align:center; border:1px dashed var(--border); border-radius:var(--radius);}
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center;
+    z-index:100; padding:20px;
+  }
+  .modal{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px;
+    width:100%; max-width:380px; max-height:85vh; overflow-y:auto;
+  }
+  .modal h3{font-size:17px; margin-bottom:6px;}
+  .modal p{color:var(--text-muted); font-size:13.5px; margin:0 0 14px;}
+  .modal .actions{display:flex; gap:8px; justify-content:flex-end; margin-top:14px;}
+
+  .activity-item{display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); font-size:13px;}
+  .activity-item:last-child{border-bottom:none;}
+  .activity-item .when{color:var(--text-muted); font-size:11px; white-space:nowrap; font-family:var(--font-mono);}
+  .activity-item .dot{width:7px; height:7px; border-radius:50%; flex:none; margin-top:5px; background:var(--text-muted);}
+  .activity-item .dot.vote{background:var(--accent);}
+  .activity-item .dot.join{background:var(--good);}
+  .activity-item .dot.money{background:#4d8fd6;}
+  .activity-item .dot.remove{background:var(--bad);}
+
+  .crew-card{padding:4px 16px;}
+  .crew-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border);}
+  .crew-row:last-child{border-bottom:none;}
+  .crew-name{flex:1; font-weight:600; font-size:14px;}
+  .you-tag{font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--accent); background:var(--surface-2); padding:1px 6px; border-radius:999px; margin-left:6px;}
+  .crew-seen{color:var(--text-muted); font-size:12px;}
+
+  .banner{
+    background:var(--surface-2); border:1px solid var(--border); border-left:3px solid var(--accent);
+    border-radius:6px; padding:10px 12px; font-size:13px; margin-bottom:16px; color:var(--text-muted);
+  }
+  .hidden{display:none !important;}
+
+  .ghost-link{background:none; border:none; color:var(--text-muted); font-size:12px; cursor:pointer; padding:4px 2px; text-decoration:underline; text-underline-offset:2px;}
+  .ghost-link:hover{color:var(--accent);}
+
+  .modal-wide{max-width:460px;}
+  .identity-grid{display:flex; flex-direction:column; gap:10px;}
+  .couple-group{border:1px solid var(--border); border-radius:8px; padding:10px;}
+  .couple-label{font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; font-weight:600;}
+  .couple-pair{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .person-btn{display:flex; align-items:center; gap:8px; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--surface-2); cursor:pointer; font-weight:600; font-size:13.5px; color:var(--text);}
+  .person-btn:hover{border-color:var(--accent); background:var(--surface);}
+
+  .payer-grid,.split-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+  .payer-btn,.split-btn{
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px;
+    border:1px solid var(--border); background:var(--surface-2); cursor:pointer;
+    font-weight:600; font-size:13px; color:var(--text-muted); text-align:left;
+  }
+  .payer-btn:hover,.split-btn:hover{border-color:var(--accent);}
+  .payer-btn.selected{border-color:var(--accent); background:var(--surface); color:var(--text); box-shadow:0 0 0 1px var(--accent);}
+  .split-btn.selected{border-color:var(--good); background:var(--good-bg); color:var(--good);}
+
+  .flight-card .flight-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+  .flight-card .flight-couple{font-family:var(--font-head); font-weight:700; font-size:15px;}
+  .flight-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13.5px;}
+  .flight-label{color:var(--text-muted); font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:2px;}
+
+  .wrap-text{white-space:pre-line; font-size:13.5px; line-height:1.5;}
+  .gear-head,.glossary-head{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .gear-item{flex:1; font-family:var(--font-head); font-weight:700; font-size:16px;}
+  .gear-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;}
+  @media (max-width:700px){.gear-grid{grid-template-columns:1fr;}}
+  .glossary-term{flex:1; font-family:var(--font-head); font-weight:700; font-size:15px;}
+  .glossary-example{margin-top:8px; font-size:13px; color:var(--text-muted); font-style:italic; border-left:2px solid var(--border); padding-left:10px;}
+
+  .itin-when{flex:none; min-width:64px; text-align:center;}
+  .itin-day{font-weight:600; font-size:12.5px;}
+  .itin-time{color:var(--text-muted); font-size:11px; margin-top:2px;}
+
+  .cal-card{padding:14px 16px;}
+  .cal-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  .cal-title{font-family:var(--font-head); font-weight:700; font-size:15px;}
+  .cal-months{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  @media (max-width:760px){.cal-months{grid-template-columns:1fr;}}
+  .cal-month-title{font-family:var(--font-head); font-weight:700; font-size:12.5px; text-align:center; margin-bottom:6px; color:var(--text-muted);}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:3px;}
+  .cal-weekday{text-align:center; font-size:9.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em; padding-bottom:3px;}
+  .cal-day{
+    aspect-ratio:1; border:1px solid transparent; background:var(--surface-2); border-radius:6px; cursor:pointer;
+    font-size:12px; color:var(--text); font-family:var(--font-mono);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:2px;
+  }
+  .cal-day:hover{border-color:var(--accent);}
+  .cal-day.empty{background:none; cursor:default; pointer-events:none;}
+  .cal-day.pending-start{background:var(--accent); color:var(--accent-ink); font-weight:700;}
+  .cal-dots{display:flex; gap:2px; height:5px;}
+  .cal-dot{width:4px; height:4px; border-radius:50%; flex:none;}
+  .cal-hint{margin-top:8px; font-size:12.5px; color:var(--text-muted); display:flex; align-items:center; gap:6px;}
+  .date-swatch{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:7px; vertical-align:middle;}
+
+  .bg-watermark{
+    position:fixed; left:0; right:0; bottom:0; width:100%; height:42vh; min-height:260px;
+    z-index:0; pointer-events:none; opacity:.5;
+  }
+  .bg-watermark svg{width:100%; height:100%; display:block;}
+
+  .hero-banner{width:100%; height:150px; overflow:hidden; display:block; border-bottom:1px solid var(--border); position:relative; z-index:1;}
+  .hero-banner svg{width:100%; height:100%; display:block;}
+  @media (max-width:600px){.hero-banner{height:108px;}}
+
+  .password-gate{
+    position:fixed; inset:0; z-index:200;
+    background:rgba(8,10,14,.6);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .password-gate.hidden{display:none;}
+  .password-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:30px 26px;
+    width:100%; max-width:340px; text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.35);
+  }
+  .password-mark{font-size:34px; margin-bottom:6px;}
+  .password-card h2{font-size:24px; margin-bottom:6px;}
+  .password-card p{color:var(--text-muted); font-size:13.5px; margin:0 0 18px;}
+  .password-card input{margin-bottom:12px; text-align:center;}
+  .password-card .btn{width:100%;}
+  .gate-error{color:var(--bad); font-size:12.5px; margin-top:12px;}
+</style>
+<script>
+  (function(){
+    try {
+      var saved = localStorage.getItem("skitrip2027_theme");
+      if (saved) document.documentElement.setAttribute("data-theme", saved);
+    } catch(e){}
+  })();
+</script>
+
+<div id="password-gate" class="password-gate">
+  <div class="password-card">
+    <div class="password-mark">🎿</div>
+    <h2>Ski Trip 2027</h2>
+    <p>This one's private — enter the password to get in.</p>
+    <input type="password" id="gate-input" placeholder="Password" autocomplete="off">
+    <button class="btn" id="gate-submit">Enter</button>
+    <div class="gate-error hidden" id="gate-error">Not quite — try again.</div>
+  </div>
+</div>
+
+<div class="bg-watermark" aria-hidden="true">
+  <svg viewBox="0 0 800 300" preserveAspectRatio="xMidYMax slice">
+    <path d="M0,300 L90,190 L180,260 L290,150 L400,240 L510,130 L620,230 L720,170 L800,210 L800,300 Z" fill="var(--mtn-back)"/>
+    <path d="M0,300 L140,230 L260,280 L380,200 L500,270 L640,210 L760,260 L800,240 L800,300 Z" fill="var(--mtn-mid)" opacity="0.7"/>
+  </svg>
+</div>
+
+<div class="hero-banner" aria-hidden="true">
+  <svg viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="heroSky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--sky-top)"/>
+        <stop offset="100%" stop-color="var(--sky-bottom)"/>
+      </linearGradient>
+      <filter id="sunGlow" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="9"/>
+      </filter>
+      <g id="pineTree">
+        <rect x="-2" y="0" width="4" height="9" fill="var(--mtn-front)"/>
+        <path d="M0,-27 L12,-5 L-12,-5 Z" fill="var(--pine)"/>
+        <path d="M0,-36 L9,-17 L-9,-17 Z" fill="var(--pine)"/>
+      </g>
+    </defs>
+    <rect width="1200" height="220" fill="url(#heroSky)"/>
+    <circle cx="1010" cy="55" r="32" fill="var(--sky-sun)" filter="url(#sunGlow)" opacity="0.55"/>
+    <circle cx="1010" cy="55" r="20" fill="var(--sky-sun)"/>
+    <path d="M0,220 L110,140 L230,180 L360,110 L500,170 L640,100 L780,165 L920,120 L1060,175 L1200,150 L1200,220 L0,220 Z" fill="var(--mtn-back)" opacity="0.65"/>
+    <path d="M0,220 L160,120 L300,190 L450,90 L600,170 L760,80 L900,180 L1040,100 L1170,165 L1200,140 L1200,220 L0,220 Z" fill="var(--mtn-mid)" opacity="0.85"/>
+    <path d="M0,220 L130,100 L280,200 L430,70 L560,165 L700,55 L840,190 L990,90 L1130,175 L1200,110 L1200,220 L0,220 Z" fill="var(--mtn-front)"/>
+    <path d="M430,70 L455,102 L405,102 Z" fill="var(--snow)"/>
+    <path d="M700,55 L728,90 L672,90 Z" fill="var(--snow)"/>
+    <path d="M990,90 L1015,120 L965,120 Z" fill="var(--snow)"/>
+    <g stroke="var(--mtn-front)" stroke-width="2.5" stroke-linecap="round" fill="none">
+      <path d="M468,152 L474,160 M474,160 L481,162 M474,160 L470,168"/>
+      <path d="M462,167 L479,163 M465,171 L482,167"/>
+    </g>
+    <circle cx="468" cy="147" r="3.5" fill="var(--mtn-front)"/>
+    <use href="#pineTree" transform="translate(35,219) scale(1)"/>
+    <use href="#pineTree" transform="translate(70,220) scale(1.15)"/>
+    <use href="#pineTree" transform="translate(105,213) scale(0.85)"/>
+    <use href="#pineTree" transform="translate(1140,206) scale(1)"/>
+    <use href="#pineTree" transform="translate(1172,213) scale(0.85)"/>
+    <use href="#pineTree" transform="translate(1197,200) scale(1.15)"/>
+  </svg>
+</div>
+
+<div class="topbar">
+  <div class="brand">
+    <svg class="mark" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M2 26 L11 9 L16 18 L20 11 L30 26 Z" fill="var(--accent)"/>
+      <path d="M11 9 L14 14.5 L8 14.5 Z" fill="var(--surface)"/>
+      <path d="M20 11 L22.2 14.7 L17.8 14.7 Z" fill="var(--surface)"/>
+    </svg>
+    <div>
+      <h1 id="trip-name">Ski Trip 2027</h1>
+      <div class="sub" id="trip-sub">Group planner</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="ghost-link" data-tab="activity" title="View activity log">📜 Activity</button>
+    <button class="iconbtn" id="theme-toggle" title="Toggle theme">◐</button>
+    <div class="chip" id="identity-chip"><span class="avatar" id="identity-avatar">?</span><span id="identity-name">Pick your name</span></div>
+  </div>
+</div>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="overview" class="active" draggable="true" title="Drag to reorder tabs">🏔️ Overview</button>
+  <button data-tab="locations" draggable="true" title="Drag to reorder tabs">📍 Locations</button>
+  <button data-tab="dates" draggable="true" title="Drag to reorder tabs">📅 Dates</button>
+  <button data-tab="lodging" draggable="true" title="Drag to reorder tabs">🏠 Lodging</button>
+  <button data-tab="flights" draggable="true" title="Drag to reorder tabs">✈️ Flights</button>
+  <button data-tab="itinerary" draggable="true" title="Drag to reorder tabs">🗒️ Itinerary</button>
+  <button data-tab="resources" draggable="true" title="Drag to reorder tabs">🎒 Resources</button>
+  <button data-tab="budget" draggable="true" title="Drag to reorder tabs">💸 Budget</button>
+</nav>
+
+<main>
+  <div id="sync-banner" class="banner hidden"></div>
+  <div class="panel active" id="panel-overview"><div class="empty">Loading trip data…</div></div>
+  <div class="panel" id="panel-locations"></div>
+  <div class="panel" id="panel-dates"></div>
+  <div class="panel" id="panel-lodging"></div>
+  <div class="panel" id="panel-flights"></div>
+  <div class="panel" id="panel-itinerary"></div>
+  <div class="panel" id="panel-resources"></div>
+  <div class="panel" id="panel-budget"></div>
+  <div class="panel" id="panel-activity"></div>
+</main>
+
+
+<div id="presence-widget" class="presence-widget hidden" title="Who's got this open right now"></div>
+
+<div id="modal-root"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var ROSTER = [
+    { id:"tj", name:"Tj", coupleId:"c1", tag:"TJ", color:"#e0554f" },
+    { id:"emma", name:"Emma", coupleId:"c1", tag:"EM", color:"#d9678a" },
+    { id:"henry", name:"Henry", coupleId:"c2", tag:"HY", color:"#3f8ae0" },
+    { id:"morgan", name:"Morgan", coupleId:"c2", tag:"MO", color:"#3aa6a6" },
+    { id:"travis", name:"Travis", coupleId:"c3", tag:"TR", color:"#7a9b3f" },
+    { id:"sabrina", name:"Sabrina", coupleId:"c3", tag:"SB", color:"#9b6fd1" },
+    { id:"sam", name:"Sam", coupleId:"c4", tag:"SM", color:"#3fae6b" },
+    { id:"jess", name:"Jess", coupleId:"c4", tag:"JS", color:"#c9a22e" }
+  ];
+  var COUPLES = [
+    { id:"c1", label:"Tj & Emma" },
+    { id:"c2", label:"Henry & Morgan" },
+    { id:"c3", label:"Travis & Sabrina" },
+    { id:"c4", label:"Sam & Jess" }
+  ];
+
+  var DEFAULT_STATE = {
+    schemaVersion: 2,
+    trip: { name: "Ski Trip 2027" },
+    participants: ROSTER.map(function(r){
+      return { id:r.id, name:r.name, coupleId:r.coupleId, tag:r.tag, color:r.color, lastSeenTs: r.id === "tj" ? 1787780160609 : null };
+    }),
+    locations: [
+      { id:"loc-steamboat", name:"Steamboat Springs, CO", notes:"", url:"", votes:["tj"] },
+      { id:"loc-breck", name:"Breckenridge, CO", notes:"", url:"", votes:[] }
+    ],
+    dates: [],
+    lodging: [],
+    flights: {},
+    itinerary: [],
+    gear: [
+      { id:"gear-jacket", item:"Ski Jacket",
+        notes:"Insulated: Warm, More Expensive\nNon-Insulated/Shell: Better for Layering, Cheaper",
+        tjNotes:"I prefer wearing a shell so I can manage temp better by wearing it over other layers (hoodie, down jacket, etc)\nMake sure the jacket is waterproof and windproof. Wet jacket = cold jacket. I like my jacket to have a hood that can go over my helmet for particularly cold/wintery days. A puffy/down jacket is not good as a shell since they are not waterproof and become cold when wet. However, they are good as mid-layers. If purchasing used or old gear, wash with Nikwax to restore waterproofing.",
+        links:"Evo.com\nEbay.com\nlevelninesports.com" },
+      { id:"gear-bibs", item:"Ski Bibs or Pants",
+        notes:"Bibs: Go over your torso like overalls. Usually warmer.\nPants: Worn just like pants. Cheaper and easier for bathroom trips.",
+        tjNotes:"Again, non insulated is better for layering with long John's imo. Pants length should touch the ground when not wearing ski boots for proper coverage. Bibs are warmer and preferred by me. They block snow/powder from entering your jacket when you fall, unlike pants, but might be more challenging for bathroom trips and things like that. Some women's bibs, like these from Burton, have a drop seat so you don't have to disrobe entirely during pit stops. Pants on the other hand, are likely going to be cheaper and offer more variation in styles/colors/patterns. If I had a choice, I'd go bibs every day, but I wore pants for 15 years with no complaints so don't write it off. If purchasing used or old gear, wash with Nikwax to restore waterproofing.",
+        links:"Evo.com\nEbay.com\nlevelninesports.com" },
+      { id:"gear-gloves", item:"Gloves / Mittons",
+        notes:"Mittons are warmer.\nGloves provide dexterity.",
+        tjNotes:"Just go with mittons. They're warmer and steezier.\nOr you can get lobster mittions for index finger dexterity if you want. Consider glove liners if your hands get cold easily.\nIf purchasing leather, add Snoseal for waterproofing. Wet hands = cold hands. Glove leashes are helpful for when you want to take off your gloves but don't want to drop them down the mountain so maybe consider getting those if your gloves don't come with them.",
+        links:"Kinco Mittons (Cheap and good, comes with waterproofing wax)\nGlove Leashes (Any like these work fine)\nEvo.com" },
+      { id:"gear-helmet", item:"Helmet",
+        notes:"Rent or Buy\nMake sure helmet has MIPS protection",
+        tjNotes:"Up to you to on whether you buy or rent, but everyone should wear a helmet regardless of experience. Beyond protection, helmets provide warmth for your head and ears. If you are buying, consider buying at the same time as you buy goggles to ensure a good helmet/goggle fit.",
+        links:"Evo.com\nEbay.com\nlevelninesports.com" },
+      { id:"gear-goggles", item:"Goggles / Sunglasses",
+        notes:"Goggles for cloudy/wintery days, sunglasses for sunny/clear days",
+        tjNotes:"You'll probably want goggles – they're cheap on evo.com and increase your steeze while protecting against the cold/wind. Don't get clear lenses but don't get something that's too dark. Reflected lenses are steezier. I usually bring sunnies as backup for super sunny days – just grab some you already have.",
+        links:"There's so many cheap options on Evo, especially from Smith and Dragon – sort by lowest price first\nThese are $30 rn, and come with a second lens for low-light\nAlso a lot of cheap options on levelninesports.com" },
+      { id:"gear-base", item:"Base Layers",
+        notes:"Usually long sleeve thermal shirt and long johns. Avoid cotton.",
+        tjNotes:"Get merino wool if possible – it's more expensive but will keep you warm and dry. Plus it won't smell so you can buy one pair and wear them every day. Other synthetics are fine too. I usually wear under my bibs: Long sleeve thermal shirt and long johns. Additional layers if needed. Consider 3/4 length long johns, especially if you're skiing. You're not gonna want to have your long johns stuffed into your boot with your socks (tight, hot, uncomfy) so having long johns that stop before your boots can be a game changer. If you don't want to buy a 3/4 pair, just grab a normal pair and cut em.",
+        links:"Uniqlo Heattech is a solid cheap choice for non-merino. Costco has good cheap offerings too." },
+      { id:"gear-mid", item:"Mid Layer",
+        notes:"If Needed: Usually a hoodie or fleece or sweater or puffy/lightweight jacket worn under your shell",
+        tjNotes:"Layer depending on the weather for the day. I usually wear a hoodie or ultralight puffer/down jacket, which comes off and goes in my backpack if it gets too warm. Just wear something you already have (hoodie, fleece, etc). Not really important for this to be waterproof/merino since it's worn over your baselayer and under your waterproof shell. Some people's legs get cold. Depending on how insulated your pants are, how often you're falling or laying in the snow (snowboarders), consider adding a pair of sweatpants or something under your pants to keep you toasty.",
+        links:"From your closet" },
+      { id:"gear-socks", item:"Socks",
+        notes:"NOT cotton\nMerino wool or synthetic made specifically for skiing",
+        tjNotes:"It's weird that you would need a specific pair of socks for skiing, but it's worth it. Ski boots are fitted and meant to be worn with thin, tall socks. Thick socks can be uncomfortable in ski boots and cut off circulation, which is bad and will make your feet cold and hurty. Boots are already insulated and warm, so don't worry about finding particularly warm socks. Consider Smartwool or another Merino wool ski sock. You probably only need 1 pair… two if you're feeling bougie. Merino wool is naturally antimicrobial so they don't smell much. If you're worried they will… washer and dryer available in our condo.",
+        links:"Just buy these and call it a day:\nSmartwool Zero Cushion\n\nCan't go wrong with Darn Tough" },
+      { id:"gear-neck", item:"Neck / Face Covering",
+        notes:"Bandana, neck gaiter, balaclava, etc",
+        tjNotes:"Totally optional but is nice for especially cold/wintery days. Keeps face warm and protects from sun and wind. There's a million options but I opt for a merino wool Buff that can be worn a number of ways around my neck or face. Bandana works too. If you wear a turtleneck base layer you may not need or want one of these.",
+        links:"Merino Wool Buff" }
+    ],
+    glossary: [
+      { id:"term-jerry", term:"🎿 Jerry", definition:"A lovable idiot on the mountain. Poles dragging, helmet crooked, doing their best. Don't be a Jerry.", example:"That guy's pizza-ing down a black with his goggles on backwards. Total Jerry." },
+      { id:"term-steez", term:"🧢 Steez", definition:"Style + ease. You're looking fly and shredding hard.", example:"Did you see that guy in the vintage one-piece? So much steez it hurts." },
+      { id:"term-yardsale", term:"💀 Yard Sale", definition:"A brutal wipeout where you lose all your gear. Like a clearance sale on the side of the run.", example:"She hit that mogul and it was a full yard sale — skis, poles, glove, gone." },
+      { id:"term-pow", term:"❄️ Pow / Pow Pow", definition:"That untouched, fluffy snow everyone's chasing. Heaven on skis.", example:"There's 8 inches of pow tomorrow. I'm ghosting work." },
+      { id:"term-apres", term:"💅 Après", definition:"The post-ski unwind. Think hot toddies, french fries, and questionable karaoke at a mountain bar.", example:"I didn't ski a single run but I've been crushing après since 11am." },
+      { id:"term-lastrun", term:"🚫 \"Last Run\"", definition:"NEVER say \"this is my last run\" — it's cursed. That's how injuries happen. Say \"one more\" or just go ghost.", example:"Bro. You said 'last run' and then dislocated your shoulder. We told you." },
+      { id:"term-shred", term:"🫡 Shred / Rip", definition:"To ski aggressively and confidently. Bonus points if you look like you're ripping even when you're not.", example:"Let's go rip a few groomers before the lines get bad." },
+      { id:"term-hotlaps", term:"🚠 Hot Laps", definition:"Quick, high-speed runs with little to no stopping. No photos. No snacks. No mercy.", example:"Let's get a few hot laps in before lunch — no stopping, no selfies." },
+      { id:"term-gapergap", term:"🪞 Gaper Gap", definition:"That unforgivable space between your helmet and goggles. Fix it. Immediately.", example:"Fix your gaper gap, you look like you rented your whole personality." },
+      { id:"term-corduroy", term:"🧼 Corduroy", definition:"Freshly groomed trails. Ride them early, brag about it all day.", example:"We were out at 8am carving fresh corduroy. Felt like a damn commercial." },
+      { id:"term-dropin", term:"🧗 Drop In", definition:"To enter a run, especially a steep or sketchy one. Usually followed by \"SEND IT.\"", example:"You're either dropping in or you're walking down. Let's go." },
+      { id:"term-icecoast", term:"📉 Ice Coast", definition:"What East Coast skiers call their icy, soul-crushing terrain. We don't have that here. Praise be.", example:"I grew up on the Ice Coast, so yeah, I can survive anything." },
+      { id:"term-parkrat", term:"🎭 Park Rat", definition:"Someone who only skis the terrain park. Big on tricks, small on shirts.", example:"He hasn't skied a normal run in years. Full park rat energy." },
+      { id:"term-deathcookies", term:"💀 Death Cookies", definition:"Frozen chunks of snow that'll rattle your knees and your faith.", example:"My knees are cooked — hit a patch of death cookies on Copperopolis." },
+      { id:"term-whiteroom", term:"🌋 The White Room", definition:"So much powder you can't see.", example:"Skied that tree line and got totally white-roomed. Unreal." },
+      { id:"term-liftie", term:"🪙 Liftie", definition:"Your friendly (sometimes stoned) chairlift operator. Be nice to them.", example:"Bring snacks. Flirt with the lifties. It's how you win the mountain." },
+      { id:"term-bluebird", term:"🥇 Bluebird Day", definition:"A sunny day after a fresh snowfall. AKA: mountain magic.", example:"Bluebird pow day tomorrow. Cancel your life." },
+      { id:"term-aprespro", term:"🪩 Après Pro", definition:"Skis meh, parties elite. Usually in vintage onesies or ridiculous hats.", example:"He fell getting off the lift but was leading conga lines by 4pm. Après pro." },
+      { id:"term-icebeard", term:"🧊 Ice Beard", definition:"A frozen beard or mustache. Badge of honor. Take a pic.", example:"Took a selfie with my ice beard. Feeling legendary." },
+      { id:"term-flatlight", term:"🚷 Flat Light", definition:"Low-contrast conditions where you can't see dips or bumps. Ski with your knees soft and your will strong.", example:"Stay loose in flat light or you're eating it, trust." },
+      { id:"term-sidecountry", term:"🛑 Sidecountry", definition:"Unmarked terrain just outside the resort. Cool, but sketchy. Don't go unless you know.", example:"We're hitting some sidecountry. Bring your beacon or don't come." },
+      { id:"term-sendit", term:"🎤 SEND IT!", definition:"Just means go. Do it. No hesitation. Also works when encouraging friends to ski a black run they definitely shouldn't.", example:"Double black? Whatever, SEND IT!" },
+      { id:"term-boardernicknames", term:"🏂 Criminals / Sliders / Pow Thieves / Edge-draggers / Flatlanders", definition:"Nicknames skiers use for boarders.", example:"Here come the criminals, sitting in the middle of the cat track again." },
+      { id:"term-swiss", term:"🧑‍🚒 Swiss", definition:"Nickname for ski patrol. Comes from their red jackets with white crosses, like the Swiss flag.", example:"Careful, the Swiss are posted up by the terrain park again. No more backflip attempts." }
+    ],
+    expenses: [],
+    activity: [
+      {"id":"act-mtam5cgx837lo","ts":1787780160609,"who":"Tj","text":"voted for \"Steamboat Springs, CO\"","type":"vote"},
+      {"id":"act-mtam52rlphy6c","ts":1787780148033,"who":"Tj","text":"removed vote for \"Breckenridge, CO\"","type":"remove"},
+      {"id":"act-mtam50jjmua9g","ts":1787780145151,"who":"Tj","text":"removed vote for \"Steamboat Springs, CO\"","type":"remove"},
+      {"id":"act-mtam402sch8y2","ts":1787780097892,"who":"Tj","text":"voted for \"Breckenridge, CO\"","type":"vote"},
+      {"id":"act-mtam3vuzoxrvj","ts":1787780092427,"who":"Tj","text":"voted for \"Steamboat Springs, CO\"","type":"vote"},
+      {"id":"act-mtam3kbr3nm28","ts":1787780077479,"who":"Tj","text":"joined the trip","type":"join"}
+    ]
+  };
+
+  function migrateState(loaded){
+    if (!loaded) return null;
+    if (loaded.schemaVersion === 2) return loaded;
+    var idMap = {};
+    var participants = ROSTER.map(function(r){
+      return { id:r.id, name:r.name, coupleId:r.coupleId, tag:r.tag, color:r.color, lastSeenTs:null };
+    });
+    (loaded.participants || []).forEach(function(old){
+      var match = ROSTER.find(function(r){ return r.name.toLowerCase() === (old.name || "").toLowerCase(); });
+      if (match){
+        idMap[old.id] = match.id;
+        var np = participants.find(function(p){ return p.id === match.id; });
+        np.lastSeenTs = old.lastSeenTs || null;
+      }
+    });
+    function remapVotes(list){
+      (list || []).forEach(function(item){
+        item.votes = (item.votes || []).map(function(oid){ return idMap[oid]; }).filter(Boolean);
+      });
+      return list || [];
+    }
+    var expenses = (loaded.expenses || []).filter(function(e){ return idMap[e.paidBy]; }).map(function(e){
+      return {
+        id: e.id, description: e.description, amountCents: e.amountCents,
+        paidBy: idMap[e.paidBy],
+        splitAmong: (e.splitAmong || []).map(function(id){ return idMap[id]; }).filter(Boolean),
+        ts: e.ts
+      };
+    });
+    return {
+      schemaVersion: 2,
+      trip: loaded.trip || DEFAULT_STATE.trip,
+      participants: participants,
+      locations: remapVotes(loaded.locations && loaded.locations.length ? loaded.locations : DEFAULT_STATE.locations),
+      dates: remapVotes(loaded.dates),
+      lodging: remapVotes(loaded.lodging),
+      flights: {},
+      itinerary: [],
+      expenses: expenses,
+      activity: loaded.activity || []
+    };
+  }
+
+  var state = null;
+
+  function uid(prefix){
+    return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+
+  // ---------- persistence (Firebase Realtime Database) ----------
+  // One shared JSON blob at /state, same shape as the old artifact-hosted
+  // data/state.json. A live listener keeps every open tab in sync in real
+  // time — no reload needed. `dirty` guards against an incoming remote
+  // snapshot clobbering an edit we haven't flushed to the server yet.
+
+  var firebaseConfig = {
+    apiKey: "AIzaSyDGpfYn1-YMV6jkJn9nDgvk1_yrYydem0U",
+    authDomain: "ski-trip-2027.firebaseapp.com",
+    databaseURL: "https://ski-trip-2027-default-rtdb.firebaseio.com",
+    projectId: "ski-trip-2027",
+    storageBucket: "ski-trip-2027.firebasestorage.app",
+    messagingSenderId: "248692108351",
+    appId: "1:248692108351:web:f65f4b12bbf0987b6bdc8a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.database();
+  var stateRef = db.ref("state");
+
+  var dirty = false;
+  var stateLoaded = false;
+
+  function startSync(){
+    stateRef.on("value", function(snapshot){
+      if (dirty) return; // an unsaved local edit is about to overwrite this anyway
+      var incoming = snapshot.val();
+      state = migrateState(incoming) || (state || JSON.parse(JSON.stringify(DEFAULT_STATE)));
+      backfillState();
+      hideBanner();
+      renderAll();
+      if (!stateLoaded){
+        stateLoaded = true;
+        if (!me()) promptIdentity(false);
+      }
+    }, function(){
+      if (!state){
+        state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+        backfillState();
+        renderAll();
+      }
+      showBanner("Can't reach the shared database right now — changes won't save until this reconnects.");
+    });
+  }
+
+  var saveTimer = null;
+  function scheduleSave(){
+    dirty = true;
+    renderAll();
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushSave, 450);
+  }
+
+  function flushSave(){
+    saveTimer = null;
+    stateRef.set(state).then(function(){
+      dirty = false;
+      hideBanner();
+    }).catch(function(){
+      showBanner("Couldn't save that change — retrying…");
+      saveTimer = setTimeout(flushSave, 1800);
+    });
+  }
+
+  function showBanner(msg){
+    var b = document.getElementById("sync-banner");
+    b.textContent = msg;
+    b.classList.remove("hidden");
+  }
+  function hideBanner(){
+    document.getElementById("sync-banner").classList.add("hidden");
+  }
+
+  // ---------- identity ----------
+
+  var LS_KEY = "skitrip2027_participant_id";
+
+  function myId(){ return localStorage.getItem(LS_KEY); }
+  function me(){
+    if (!state) return null;
+    var id = myId();
+    return state.participants.find(function(p){ return p.id === id; }) || null;
+  }
+  function setMyId(id){ localStorage.setItem(LS_KEY, id); }
+
+  function initials(name){
+    var parts = name.trim().split(/\s+/);
+    return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
+  }
+
+  function logActivity(text, type){
+    var m = me();
+    if (m) m.lastSeenTs = Date.now();
+    state.activity.unshift({
+      id: uid("act"),
+      ts: Date.now(),
+      who: m ? m.name : "Someone",
+      text: text,
+      type: type || "default"
+    });
+    if (state.activity.length > 200) state.activity.length = 200;
+  }
+
+  function relTime(ts){
+    var diff = Date.now() - ts;
+    if (diff < 60000) return "just now";
+    var mins = Math.floor(diff / 60000);
+    if (mins < 60) return mins + "m ago";
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + "h ago";
+    var days = Math.floor(hrs / 24);
+    if (days < 7) return days + "d ago";
+    return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+
+  function participantTag(id){
+    var p = state.participants.find(function(x){ return x.id === id; });
+    return p && p.tag ? p.tag : initials(participantName(id));
+  }
+
+  function participantColor(id){
+    var p = state.participants.find(function(x){ return x.id === id; });
+    return p && p.color ? p.color : "var(--accent)";
+  }
+
+  function promptIdentity(forceSwitch){
+    var root = document.getElementById("modal-root");
+    var groups = COUPLES.map(function(c){
+      var members = state.participants.filter(function(p){ return p.coupleId === c.id; });
+      var btns = members.map(function(p){
+        return '<button class="person-btn" data-pick="' + p.id + '">' +
+          '<span class="avatar" style="background:' + (p.color || "var(--accent)") + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>' +
+          '<span>' + escapeHtml(p.name) + '</span>' +
+        '</button>';
+      }).join("");
+      return '<div class="couple-group"><div class="couple-label">' + escapeHtml(c.label) + '</div><div class="couple-pair">' + btns + '</div></div>';
+    }).join("");
+    root.innerHTML =
+      '<div class="modal-backdrop"><div class="modal modal-wide">' +
+        '<h3>Who\'s this?</h3>' +
+        '<p>Pick your name — this device will remember it.</p>' +
+        '<div class="identity-grid">' + groups + '</div>' +
+        (forceSwitch ? '<div class="actions"><button class="btn secondary" id="identity-cancel">Cancel</button></div>' : '') +
+      '</div></div>';
+
+    Array.prototype.slice.call(root.querySelectorAll("[data-pick]")).forEach(function(btn){
+      btn.onclick = function(){ selectIdentity(btn.dataset.pick); };
+    });
+    var cancelBtn = document.getElementById("identity-cancel");
+    if (cancelBtn) cancelBtn.onclick = function(){ root.innerHTML = ""; };
+  }
+
+  function selectIdentity(id){
+    var p = state.participants.find(function(x){ return x.id === id; });
+    if (!p) return;
+    setMyId(id);
+    document.getElementById("modal-root").innerHTML = "";
+    logActivity("checked in", "join");
+    scheduleSave();
+    registerPresence();
+  }
+
+  // ---------- voting ----------
+
+  function toggleVote(list, itemId, displayName){
+    var m = me();
+    if (!m) return promptIdentity(false);
+    var item = list.find(function(i){ return i.id === itemId; });
+    if (!item) return;
+    var label = displayName || item.name;
+    var idx = item.votes.indexOf(m.id);
+    if (idx === -1){
+      item.votes.push(m.id);
+      logActivity('voted for "' + label + '"', "vote");
+    } else {
+      item.votes.splice(idx, 1);
+      logActivity('removed vote for "' + label + '"', "remove");
+    }
+    scheduleSave();
+  }
+
+  // ---------- generic list CRUD (locations, dates, lodging) ----------
+
+  var LIST_CONFIG = {
+    locations: { title: "Locations", singular: "location", subtitle: "Where are we even going?",
+      empty: "No location options yet — add Steamboat, Breck, or wherever's in the running.",
+      fields: [
+        {key:"name", label:"Name", type:"text", required:true},
+        {key:"url", label:"Link", type:"url"},
+        {key:"notes", label:"Notes", type:"text"}
+      ]
+    },
+    lodging: { title: "Lodging", singular:"place", subtitle: "Vote for your favorite crash pad.",
+      empty:"No lodging options yet — drop in a VRBO or Airbnb link.",
+      fields: [
+        {key:"name", label:"Name", type:"text", required:true},
+        {key:"url", label:"Listing link", type:"url"},
+        {key:"notes", label:"Notes", type:"text", placeholder:"price, bedrooms, distance to lifts..."}
+      ]
+    },
+    itinerary: { title: "Itinerary", singular: "item", noVote: true, nameField: "title",
+      empty: "Nothing on the itinerary yet — add arrival, first day on the mountain, dinner plans...",
+      fields: [
+        {key:"day", label:"Day", type:"text", required:true, placeholder:"e.g. Sat, Jan 16"},
+        {key:"time", label:"Time", type:"text", placeholder:"e.g. 3:00 PM"},
+        {key:"title", label:"What", type:"text", required:true},
+        {key:"notes", label:"Notes", type:"text"}
+      ]
+    },
+    gear: { title: "What to Wear", singular: "item", noVote: true, nameField: "item", wide: true,
+      empty: "No gear notes yet — add the first one.",
+      fields: [
+        {key:"item", label:"Item", type:"text", required:true},
+        {key:"notes", label:"Notes", type:"textarea", placeholder:"the basics"},
+        {key:"tjNotes", label:"Tj's notes", type:"textarea", placeholder:"the rant"},
+        {key:"links", label:"Links / good options", type:"textarea", placeholder:"one per line"}
+      ]
+    },
+    glossary: { title: "Ski Glossary", singular: "term", noVote: true, nameField: "term", wide: true,
+      empty: "No terms yet — add the first one so nobody sounds like a Jerry.",
+      fields: [
+        {key:"term", label:"Term", type:"text", required:true, placeholder:"🎿 Jerry"},
+        {key:"definition", label:"Definition", type:"textarea", required:true},
+        {key:"example", label:"Used in a sentence", type:"textarea"}
+      ]
+    }
+  };
+
+  function addOrEditItem(listKey, existingId){
+    var cfg = LIST_CONFIG[listKey];
+    var list = state[listKey];
+    var existing = existingId ? list.find(function(i){ return i.id === existingId; }) : null;
+    var root = document.getElementById("modal-root");
+    var fieldsHtml = cfg.fields.map(function(f){
+      var val = existing ? (existing[f.key] || "") : "";
+      if (f.type === "textarea"){
+        return '<div class="field"><label>' + f.label + (f.required ? " *" : "") + '</label>' +
+          '<textarea rows="4" data-field="' + f.key + '"' +
+          (f.placeholder ? ' placeholder="' + escapeAttr(f.placeholder) + '"' : '') + '>' + escapeHtml(val) + '</textarea></div>';
+      }
+      return '<div class="field"><label>' + f.label + (f.required ? " *" : "") + '</label>' +
+        '<input type="' + f.type + '" data-field="' + f.key + '" value="' + escapeAttr(val) + '"' +
+        (f.placeholder ? ' placeholder="' + escapeAttr(f.placeholder) + '"' : '') + '></div>';
+    }).join("");
+    root.innerHTML =
+      '<div class="modal-backdrop"><div class="modal' + (cfg.wide ? ' modal-wide' : '') + '">' +
+        '<h3>' + (existing ? "Edit" : "Add") + " " + cfg.singular + '</h3>' +
+        '<div id="crud-fields">' + fieldsHtml + '</div>' +
+        '<div class="actions">' +
+          '<button class="btn secondary" id="crud-cancel">Cancel</button>' +
+          '<button class="btn" id="crud-save">Save</button>' +
+        '</div>' +
+      '</div></div>';
+    document.getElementById("crud-cancel").onclick = function(){ root.innerHTML = ""; };
+    document.getElementById("crud-save").onclick = function(){
+      var inputs = root.querySelectorAll("[data-field]");
+      var values = {};
+      var ok = true;
+      inputs.forEach(function(inp){
+        values[inp.dataset.field] = inp.value.trim();
+      });
+      cfg.fields.forEach(function(f){
+        if (f.required && !values[f.key]) ok = false;
+      });
+      if (!ok) return;
+      var nameField = cfg.nameField || "name";
+      if (existing){
+        cfg.fields.forEach(function(f){ existing[f.key] = values[f.key]; });
+        logActivity('edited "' + existing[nameField] + '" in ' + cfg.title.toLowerCase());
+      } else {
+        var item = { id: uid(listKey) };
+        if (!cfg.noVote) item.votes = [];
+        cfg.fields.forEach(function(f){ item[f.key] = values[f.key]; });
+        list.push(item);
+        logActivity('added "' + item[nameField] + '" to ' + cfg.title.toLowerCase(), "join");
+      }
+      root.innerHTML = "";
+      scheduleSave();
+    };
+  }
+
+  function deleteItem(listKey, id){
+    var list = state[listKey];
+    var idx = list.findIndex(function(i){ return i.id === id; });
+    if (idx === -1) return;
+    var cfg = LIST_CONFIG[listKey];
+    var name = list[idx][cfg.nameField || "name"];
+    list.splice(idx, 1);
+    logActivity('removed "' + name + '" from ' + cfg.title.toLowerCase(), "remove");
+    scheduleSave();
+  }
+
+  // ---------- budget ----------
+
+  function dollarsToCents(str){
+    var n = parseFloat(str);
+    if (isNaN(n)) return 0;
+    return Math.round(n * 100);
+  }
+  function fmtCents(c){
+    var neg = c < 0;
+    c = Math.abs(c);
+    var s = (c/100).toFixed(2);
+    return (neg ? "-$" : "$") + s;
+  }
+
+  function computeBalances(){
+    var bal = {};
+    state.participants.forEach(function(p){ bal[p.id] = 0; });
+    state.expenses.forEach(function(e){
+      if (!(e.paidBy in bal) || !e.splitAmong.length) return;
+      var settled = e.settledBy || [];
+      var share = Math.floor(e.amountCents / e.splitAmong.length);
+      var remainder = e.amountCents - share * e.splitAmong.length;
+      e.splitAmong.forEach(function(pid, i){
+        if (pid === e.paidBy) return;
+        if (settled.indexOf(pid) !== -1) return;
+        if (!(pid in bal)) return;
+        var portion = share + (i < remainder ? 1 : 0);
+        bal[pid] -= portion;
+        bal[e.paidBy] += portion;
+      });
+    });
+    return bal;
+  }
+
+  function computeSettlements(bal){
+    var creditors = [], debtors = [];
+    Object.keys(bal).forEach(function(id){
+      if (bal[id] > 0) creditors.push({ id:id, amt:bal[id] });
+      else if (bal[id] < 0) debtors.push({ id:id, amt:-bal[id] });
+    });
+    creditors.sort(function(a,b){ return b.amt - a.amt; });
+    debtors.sort(function(a,b){ return b.amt - a.amt; });
+    var settlements = [];
+    var i=0, j=0;
+    while (i < debtors.length && j < creditors.length){
+      var pay = Math.min(debtors[i].amt, creditors[j].amt);
+      if (pay > 0) settlements.push({ from:debtors[i].id, to:creditors[j].id, amount:pay });
+      debtors[i].amt -= pay; creditors[j].amt -= pay;
+      if (debtors[i].amt === 0) i++;
+      if (creditors[j].amt === 0) j++;
+    }
+    return settlements;
+  }
+
+  function participantName(id){
+    var p = state.participants.find(function(x){ return x.id === id; });
+    return p ? p.name : "Unknown";
+  }
+
+  function openExpenseModal(existingId){
+    var existing = existingId ? state.expenses.find(function(e){ return e.id === existingId; }) : null;
+    var root = document.getElementById("modal-root");
+    var initialPayer = existing ? existing.paidBy : myId();
+    var payerGridHtml = state.participants.map(function(p){
+      return '<button type="button" class="payer-btn' + (p.id === initialPayer ? ' selected' : '') + '" data-payer-pick="' + p.id + '">' +
+        '<span class="avatar" style="background:' + (p.color || "var(--accent)") + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>' +
+        '<span>' + escapeHtml(p.name) + '</span>' +
+      '</button>';
+    }).join("");
+    var splitGridHtml = state.participants.map(function(p){
+      var checked = existing ? existing.splitAmong.indexOf(p.id) !== -1 : true;
+      return '<button type="button" class="split-btn' + (checked ? ' selected' : '') + '" data-split-toggle="' + p.id + '">' +
+        '<span class="avatar" style="background:' + (p.color || "var(--accent)") + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>' +
+        '<span>' + escapeHtml(p.name) + '</span>' +
+      '</button>';
+    }).join("");
+    root.innerHTML =
+      '<div class="modal-backdrop"><div class="modal modal-wide">' +
+        '<h3>' + (existing ? "Edit" : "Add") + ' expense</h3>' +
+        '<div class="field"><label>Description</label><input type="text" id="exp-desc" value="' + escapeAttr(existing ? existing.description : "") + '" placeholder="e.g. Lodging deposit"></div>' +
+        '<div class="field"><label>Amount</label><input type="number" step="0.01" id="exp-amount" value="' + (existing ? (existing.amountCents/100).toFixed(2) : "") + '" placeholder="0.00"></div>' +
+        '<div class="field"><label>Who actually paid?</label><div class="payer-grid" id="exp-payer-grid">' + payerGridHtml + '</div>' +
+          '<input type="hidden" id="exp-payer" value="' + escapeAttr(initialPayer || "") + '"></div>' +
+        '<div class="field"><label>Split among</label><div class="split-grid" id="exp-split-grid">' + splitGridHtml + '</div></div>' +
+        '<div class="actions">' +
+          '<button class="btn secondary" id="exp-cancel">Cancel</button>' +
+          '<button class="btn" id="exp-save">Save</button>' +
+        '</div>' +
+      '</div></div>';
+    document.getElementById("exp-cancel").onclick = function(){ root.innerHTML = ""; };
+    Array.prototype.slice.call(document.getElementById("exp-payer-grid").querySelectorAll("[data-payer-pick]")).forEach(function(btn){
+      btn.onclick = function(){
+        document.getElementById("exp-payer").value = btn.dataset.payerPick;
+        document.getElementById("exp-payer-grid").querySelectorAll(".payer-btn").forEach(function(b){ b.classList.remove("selected"); });
+        btn.classList.add("selected");
+      };
+    });
+    Array.prototype.slice.call(document.getElementById("exp-split-grid").querySelectorAll("[data-split-toggle]")).forEach(function(btn){
+      btn.onclick = function(){ btn.classList.toggle("selected"); };
+    });
+    document.getElementById("exp-save").onclick = function(){
+      var desc = document.getElementById("exp-desc").value.trim();
+      var amount = dollarsToCents(document.getElementById("exp-amount").value);
+      var payer = document.getElementById("exp-payer").value;
+      var split = Array.prototype.slice.call(root.querySelectorAll("[data-split-toggle]"))
+        .filter(function(b){ return b.classList.contains("selected"); })
+        .map(function(b){ return b.dataset.splitToggle; });
+      if (!desc || amount <= 0 || !payer || !split.length) return;
+      if (existing){
+        existing.description = desc; existing.amountCents = amount; existing.paidBy = payer; existing.splitAmong = split;
+        logActivity('edited expense "' + desc + '"', "money");
+      } else {
+        state.expenses.push({ id: uid("exp"), description:desc, amountCents:amount, paidBy:payer, splitAmong:split, ts:Date.now() });
+        logActivity('added expense "' + desc + '" (' + fmtCents(amount) + '), paid by ' + participantName(payer), "money");
+      }
+      root.innerHTML = "";
+      scheduleSave();
+    };
+  }
+
+  function deleteExpense(id){
+    var idx = state.expenses.findIndex(function(e){ return e.id === id; });
+    if (idx === -1) return;
+    var desc = state.expenses[idx].description;
+    state.expenses.splice(idx, 1);
+    logActivity('deleted expense "' + desc + '"', "remove");
+    scheduleSave();
+  }
+
+  function toggleSettled(expenseId, personId){
+    var e = state.expenses.find(function(x){ return x.id === expenseId; });
+    if (!e) return;
+    if (!e.settledBy) e.settledBy = [];
+    var idx = e.settledBy.indexOf(personId);
+    var pname = participantName(personId);
+    if (idx === -1){
+      e.settledBy.push(personId);
+      logActivity(pname + ' settled up on "' + e.description + '"', "money");
+    } else {
+      e.settledBy.splice(idx, 1);
+      logActivity(pname + ' marked "' + e.description + '" unsettled', "default");
+    }
+    scheduleSave();
+  }
+
+  // ---------- rendering ----------
+
+  function escapeHtml(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function escapeAttr(s){ return escapeHtml(s); }
+
+  var expandedComments = {};
+
+  function findVotableItem(id){
+    var lists = { locations: state.locations, dates: state.dates, lodging: state.lodging };
+    for (var key in lists){
+      var found = lists[key].find(function(i){ return i.id === id; });
+      if (found) return { item: found, listKey: key };
+    }
+    return null;
+  }
+
+  function votableLabel(listKey, item){
+    return listKey === "dates" ? fmtDateRange(item.start, item.end) : item.name;
+  }
+
+  function addComment(itemId, text){
+    text = (text || "").trim();
+    if (!text) return;
+    var m = me();
+    if (!m) return promptIdentity(false);
+    var found = findVotableItem(itemId);
+    if (!found) return;
+    if (!found.item.comments) found.item.comments = [];
+    found.item.comments.push({ id: uid("cmt"), personId: m.id, text: text, ts: Date.now() });
+    logActivity('commented on "' + votableLabel(found.listKey, found.item) + '"', "default");
+    scheduleSave();
+  }
+
+  function deleteComment(itemId, commentId){
+    var found = findVotableItem(itemId);
+    if (!found || !found.item.comments) return;
+    var idx = found.item.comments.findIndex(function(c){ return c.id === commentId; });
+    if (idx === -1) return;
+    found.item.comments.splice(idx, 1);
+    scheduleSave();
+  }
+
+  function renderComments(item){
+    var comments = item.comments || [];
+    var isOpen = !!expandedComments[item.id];
+    var toggleLabel = comments.length ? (comments.length + (comments.length === 1 ? " comment" : " comments")) : "Comment";
+    var html = '<button class="comment-toggle" data-comment-toggle="' + item.id + '">💬 ' + toggleLabel + '</button>';
+    if (isOpen){
+      html += '<div class="comment-thread">';
+      comments.forEach(function(c){
+        html += '<div class="comment-item">' +
+          '<span class="avatar" style="background:' + participantColor(c.personId) + '">' + escapeHtml(participantTag(c.personId)) + '</span>' +
+          '<div class="comment-body"><span class="comment-who">' + escapeHtml(participantName(c.personId)) + '</span>' +
+          '<span class="comment-when mono">' + relTime(c.ts) + '</span>' +
+          '<div>' + escapeHtml(c.text) + '</div></div>' +
+          '<button class="icon-only" data-comment-del="' + item.id + '" data-comment-id="' + c.id + '" title="Delete">✕</button>' +
+        '</div>';
+      });
+      html += '<div class="comment-input-row">' +
+        '<input type="text" data-comment-input="' + item.id + '" placeholder="Say something...">' +
+        '<button class="btn small" data-comment-add="' + item.id + '">Post</button>' +
+      '</div>';
+      html += '</div>';
+    }
+    return html;
+  }
+
+  function renderVoteRow(listKey, item, extraMeta){
+    var m = me();
+    var voted = m && item.votes.indexOf(m.id) !== -1;
+    var avatarsHtml = item.votes.slice(0,6).map(function(pid){
+      return '<span class="avatar" style="background:' + participantColor(pid) + '" title="' + escapeAttr(participantName(pid)) + '">' + escapeHtml(participantTag(pid)) + '</span>';
+    }).join("");
+    return '<div class="card" draggable="true" data-drag-id="' + item.id + '">' +
+      '<div class="vote-row">' +
+        '<span class="drag-handle" title="Drag to reorder">⠿</span>' +
+        '<button class="votebtn' + (voted ? " voted" : "") + '" data-vote="' + item.id + '"><span class="count">' + item.votes.length + '</span><span class="label">' + (item.votes.length===1?"vote":"votes") + '</span></button>' +
+        '<div class="info">' +
+          '<div class="name">' + escapeHtml(item.name) + '</div>' +
+          '<div class="meta">' + (extraMeta || "") + '</div>' +
+          (item.votes.length ? '<div class="avatars">' + avatarsHtml + '</div>' : "") +
+        '</div>' +
+        '<div class="row-actions">' +
+          '<button class="icon-only" data-edit="' + item.id + '" title="Edit">✎</button>' +
+          '<button class="icon-only" data-del="' + item.id + '" title="Remove">✕</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="comment-zone">' + renderComments(item) + '</div>' +
+    '</div>';
+  }
+
+  function renderListPanel(listKey){
+    var cfg = LIST_CONFIG[listKey];
+    var list = state[listKey];
+    var html = '<div class="section-head"><div><h2>' + cfg.title + '</h2><p>' + (cfg.subtitle || "Vote for your favorite.") + '</p></div><button class="btn" data-add="' + listKey + '">+ Add ' + cfg.singular + '</button></div>';
+    if (!list.length){
+      html += '<div class="empty">' + cfg.empty + '</div>';
+    } else {
+      list.forEach(function(item){
+        var meta = [];
+        if (item.notes) meta.push(escapeHtml(item.notes));
+        if (item.url) meta.push('<a href="' + escapeAttr(item.url) + '" target="_blank" rel="noopener">listing link</a>');
+        html += renderVoteRow(listKey, item, meta.join(" · "));
+      });
+    }
+    document.getElementById("panel-" + listKey).innerHTML = html;
+  }
+
+  // ---------- itinerary ----------
+
+  function renderItineraryRow(item){
+    return '<div class="card" draggable="true" data-drag-id="' + item.id + '">' +
+      '<div class="vote-row">' +
+        '<span class="drag-handle" title="Drag to reorder">⠿</span>' +
+        '<div class="itin-when"><div class="itin-day">' + escapeHtml(item.day) + '</div>' +
+          (item.time ? '<div class="itin-time mono">' + escapeHtml(item.time) + '</div>' : '') +
+        '</div>' +
+        '<div class="info">' +
+          '<div class="name">' + escapeHtml(item.title) + '</div>' +
+          (item.notes ? '<div class="meta">' + escapeHtml(item.notes) + '</div>' : '') +
+        '</div>' +
+        '<div class="row-actions">' +
+          '<button class="icon-only" data-edit="' + item.id + '" title="Edit">✎</button>' +
+          '<button class="icon-only" data-del="' + item.id + '" title="Remove">✕</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderItinerary(){
+    var cfg = LIST_CONFIG.itinerary;
+    var list = state.itinerary;
+    var html = '<div class="section-head"><div><h2>Itinerary</h2><p>The day-by-day plan. Drag to reorder.</p></div><button class="btn" data-add="itinerary">+ Add item</button></div>';
+    if (!list.length){
+      html += '<div class="empty">' + cfg.empty + '</div>';
+    } else {
+      list.forEach(function(item){ html += renderItineraryRow(item); });
+    }
+    document.getElementById("panel-itinerary").innerHTML = html;
+  }
+
+  // ---------- flights ----------
+
+  function renderFlights(){
+    var html = '<div class="section-head"><div><h2>Flights</h2><p>Who\'s flying when, so nobody\'s stranded at baggage claim.</p></div></div>';
+    COUPLES.forEach(function(c){
+      var f = state.flights[c.id];
+      html += '<div class="card flight-card">' +
+        '<div class="flight-head"><span class="flight-couple">' + escapeHtml(c.label) + '</span>' +
+        '<button class="icon-only" data-flight-edit="' + c.id + '" title="Edit">✎</button></div>';
+      if (!f || (!f.arrivalFlight && !f.departureFlight && !f.notes)){
+        html += '<div class="empty" style="padding:10px;">No flight info yet.</div>';
+      } else {
+        html += '<div class="flight-grid">' +
+          '<div><div class="flight-label">Arrival</div><div>' + (f.arrivalFlight ? escapeHtml(f.arrivalFlight) : "—") + '</div>' +
+            (f.arrivalWhen ? '<div class="meta">' + escapeHtml(f.arrivalWhen) + '</div>' : '') + '</div>' +
+          '<div><div class="flight-label">Departure</div><div>' + (f.departureFlight ? escapeHtml(f.departureFlight) : "—") + '</div>' +
+            (f.departureWhen ? '<div class="meta">' + escapeHtml(f.departureWhen) + '</div>' : '') + '</div>' +
+        '</div>';
+        if (f.notes) html += '<div class="meta" style="margin-top:8px;">' + escapeHtml(f.notes) + '</div>';
+      }
+      html += '</div>';
+    });
+    document.getElementById("panel-flights").innerHTML = html;
+  }
+
+  function openFlightModal(coupleId){
+    var couple = COUPLES.find(function(c){ return c.id === coupleId; });
+    if (!couple) return;
+    var f = state.flights[coupleId] || {};
+    var root = document.getElementById("modal-root");
+    root.innerHTML =
+      '<div class="modal-backdrop"><div class="modal">' +
+        '<h3>' + escapeHtml(couple.label) + ' — flights</h3>' +
+        '<div class="field"><label>Arrival flight</label><input type="text" id="fl-arr-flight" value="' + escapeAttr(f.arrivalFlight || "") + '" placeholder="e.g. UA 1421"></div>' +
+        '<div class="field"><label>Arrival date/time</label><input type="text" id="fl-arr-when" value="' + escapeAttr(f.arrivalWhen || "") + '" placeholder="e.g. Jan 16, 2:40 PM into HDN"></div>' +
+        '<div class="field"><label>Departure flight</label><input type="text" id="fl-dep-flight" value="' + escapeAttr(f.departureFlight || "") + '" placeholder="e.g. UA 889"></div>' +
+        '<div class="field"><label>Departure date/time</label><input type="text" id="fl-dep-when" value="' + escapeAttr(f.departureWhen || "") + '" placeholder="e.g. Jan 23, 11:15 AM"></div>' +
+        '<div class="field"><label>Notes</label><input type="text" id="fl-notes" value="' + escapeAttr(f.notes || "") + '" placeholder="rental car, shuttle, etc."></div>' +
+        '<div class="actions">' +
+          '<button class="btn secondary" id="fl-cancel">Cancel</button>' +
+          '<button class="btn" id="fl-save">Save</button>' +
+        '</div>' +
+      '</div></div>';
+    document.getElementById("fl-cancel").onclick = function(){ root.innerHTML = ""; };
+    document.getElementById("fl-save").onclick = function(){
+      state.flights[coupleId] = {
+        arrivalFlight: document.getElementById("fl-arr-flight").value.trim(),
+        arrivalWhen: document.getElementById("fl-arr-when").value.trim(),
+        departureFlight: document.getElementById("fl-dep-flight").value.trim(),
+        departureWhen: document.getElementById("fl-dep-when").value.trim(),
+        notes: document.getElementById("fl-notes").value.trim()
+      };
+      logActivity("updated flight info for " + couple.label, "default");
+      root.innerHTML = "";
+      scheduleSave();
+    };
+  }
+
+  // ---------- resources (gear + glossary) ----------
+
+  function nlToBr(text){
+    return escapeHtml(text).replace(/\n/g, "<br>");
+  }
+
+  function renderGearRow(item){
+    return '<div class="card gear-card" draggable="true" data-drag-id="' + item.id + '" data-list="gear">' +
+      '<div class="gear-head">' +
+        '<span class="drag-handle" title="Drag to reorder">⠿</span>' +
+        '<span class="gear-item">' + escapeHtml(item.item) + '</span>' +
+        '<div class="row-actions">' +
+          '<button class="icon-only" data-edit="' + item.id + '" title="Edit">✎</button>' +
+          '<button class="icon-only" data-del="' + item.id + '" title="Remove">✕</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="gear-grid">' +
+        (item.notes ? '<div><div class="flight-label">Notes</div><div class="wrap-text">' + nlToBr(item.notes) + '</div></div>' : '') +
+        (item.tjNotes ? '<div><div class="flight-label">Tj\'s notes</div><div class="wrap-text">' + nlToBr(item.tjNotes) + '</div></div>' : '') +
+        (item.links ? '<div><div class="flight-label">Links / good options</div><div class="wrap-text">' + nlToBr(item.links) + '</div></div>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderGlossaryRow(item){
+    return '<div class="card glossary-card" draggable="true" data-drag-id="' + item.id + '" data-list="glossary">' +
+      '<div class="glossary-head">' +
+        '<span class="drag-handle" title="Drag to reorder">⠿</span>' +
+        '<span class="glossary-term">' + escapeHtml(item.term) + '</span>' +
+        '<div class="row-actions">' +
+          '<button class="icon-only" data-edit="' + item.id + '" title="Edit">✎</button>' +
+          '<button class="icon-only" data-del="' + item.id + '" title="Remove">✕</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="wrap-text">' + escapeHtml(item.definition) + '</div>' +
+      (item.example ? '<div class="glossary-example">“' + escapeHtml(item.example) + '”</div>' : '') +
+    '</div>';
+  }
+
+  function renderResources(){
+    var gearCfg = LIST_CONFIG.gear, glossCfg = LIST_CONFIG.glossary;
+    var html = '<div class="section-head"><div><h2>🎒 Resources</h2><p>Don\'t be a Jerry. Read up.</p></div></div>';
+
+    html += '<div class="section-head" style="margin-top:4px;"><div><h3 style="font-family:var(--font-head);font-size:16px;">What to Wear on the Mountain</h3></div><button class="btn" data-add="gear">+ Add item</button></div>';
+    if (!state.gear.length){
+      html += '<div class="empty">' + gearCfg.empty + '</div>';
+    } else {
+      state.gear.forEach(function(item){ html += renderGearRow(item); });
+    }
+
+    html += '<div class="section-head" style="margin-top:26px;"><div><h3 style="font-family:var(--font-head);font-size:16px;">Ski Glossary</h3><p>Mountain lingo so you don\'t sound like a Jerry.</p></div><button class="btn" data-add="glossary">+ Add term</button></div>';
+    if (!state.glossary.length){
+      html += '<div class="empty">' + glossCfg.empty + '</div>';
+    } else {
+      state.glossary.forEach(function(item){ html += renderGlossaryRow(item); });
+    }
+
+    document.getElementById("panel-resources").innerHTML = html;
+  }
+
+  // ---------- dates (calendar) ----------
+
+  var calView = { year: 2027, month: 0 };
+  var pendingRange = { start: null, end: null };
+
+  function pad2(n){ return n < 10 ? "0" + n : "" + n; }
+  function isoDate(y, m, d){ return y + "-" + pad2(m + 1) + "-" + pad2(d); }
+  function fmtDateShort(iso){
+    return new Date(iso + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+  function fmtDateRange(startIso, endIso){
+    var s = new Date(startIso + "T00:00:00"), e = new Date(endIso + "T00:00:00");
+    var nights = Math.round((e - s) / 86400000);
+    var sameMonth = s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear();
+    var startStr = fmtDateShort(startIso);
+    var endStr = sameMonth ? e.getDate() : fmtDateShort(endIso);
+    return startStr + "–" + endStr + ", " + e.getFullYear() + " · " + nights + " night" + (nights === 1 ? "" : "s");
+  }
+  var DATE_PALETTE = ["#e0554f","#3f8ae0","#3fae6b","#c99a2e","#9b6fd1","#3aa6a6","#d9678a","#7a8b3f"];
+  function dateColor(itemId){
+    var idx = state.dates.findIndex(function(d){ return d.id === itemId; });
+    return DATE_PALETTE[Math.max(idx, 0) % DATE_PALETTE.length];
+  }
+  function proposalsForDate(iso){
+    return state.dates.filter(function(d){ return iso >= d.start && iso <= d.end; });
+  }
+  function addMonths(year, month, delta){
+    var total = month + delta;
+    return { year: year + Math.floor(total / 12), month: ((total % 12) + 12) % 12 };
+  }
+
+  function renderMonthGrid(ym){
+    var y = ym.year, m = ym.month;
+    var monthName = new Date(y, m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+    var firstWeekday = new Date(y, m, 1).getDay();
+    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var html = '<div class="cal-month"><div class="cal-month-title">' + monthName + '</div><div class="cal-grid">';
+    ["S","M","T","W","T","F","S"].forEach(function(w){ html += '<div class="cal-weekday">' + w + '</div>'; });
+    for (var i = 0; i < firstWeekday; i++) html += '<div class="cal-day empty"></div>';
+    for (var d = 1; d <= daysInMonth; d++){
+      var iso = isoDate(y, m, d);
+      var props = proposalsForDate(iso);
+      var classes = "cal-day";
+      if (pendingRange.start === iso && !pendingRange.end) classes += " pending-start";
+      var dots = props.slice(0, 4).map(function(p){
+        return '<span class="cal-dot" style="background:' + dateColor(p.id) + '"></span>';
+      }).join("");
+      html += '<button class="' + classes + '" data-date="' + iso + '"><span class="cal-daynum">' + d + '</span>' +
+        (dots ? '<span class="cal-dots">' + dots + '</span>' : '') + '</button>';
+    }
+    html += '</div></div>';
+    return html;
+  }
+
+  function renderCalendar(){
+    var root = document.getElementById("cal-root");
+    if (!root) return;
+    var first = { year: calView.year, month: calView.month };
+    var last = addMonths(calView.year, calView.month, 2);
+    var rangeLabel = new Date(first.year, first.month, 1).toLocaleDateString(undefined, { month: "short" }) +
+      " – " + new Date(last.year, last.month, 1).toLocaleDateString(undefined, { month: "short", year: "numeric" });
+    var html = '<div class="cal-header"><button class="iconbtn" data-cal-nav="-1" title="Previous month">‹</button>' +
+      '<div class="cal-title">' + rangeLabel + '</div>' +
+      '<button class="iconbtn" data-cal-nav="1" title="Next month">›</button></div>';
+    html += '<div class="cal-months">';
+    for (var i = 0; i < 3; i++) html += renderMonthGrid(addMonths(calView.year, calView.month, i));
+    html += '</div>';
+    if (pendingRange.start && !pendingRange.end){
+      html += '<div class="cal-hint">Pick an end date for ' + fmtDateShort(pendingRange.start) + '<button class="ghost-link" id="cal-clear-pending">clear</button></div>';
+    }
+    root.innerHTML = html;
+  }
+
+  function renderDatesPanel(){
+    var html = '<div class="section-head"><div><h2>Dates</h2><p>Vote on proposed date ranges, or tap the calendar below to add your own.</p></div><button class="btn" data-add="dates">+ Add manually</button></div>';
+    html += '<div id="date-options-root"></div>';
+    html += '<div class="card cal-card" id="cal-root"></div>';
+    document.getElementById("panel-dates").innerHTML = html;
+    renderDateOptions();
+    renderCalendar();
+  }
+
+  function renderDateOptions(){
+    var list = state.dates.slice().sort(function(a, b){ return a.start < b.start ? -1 : a.start > b.start ? 1 : 0; });
+    var html;
+    if (!list.length){
+      html = '<div class="empty">No dates proposed yet — tap a range on the calendar below.</div>';
+    } else {
+      html = list.map(renderDateRow).join("");
+    }
+    document.getElementById("date-options-root").innerHTML = html;
+  }
+
+  function renderDateRow(item){
+    var m = me();
+    var voted = m && item.votes.indexOf(m.id) !== -1;
+    var avatarsHtml = item.votes.slice(0,6).map(function(pid){
+      return '<span class="avatar" style="background:' + participantColor(pid) + '" title="' + escapeAttr(participantName(pid)) + '">' + escapeHtml(participantTag(pid)) + '</span>';
+    }).join("");
+    return '<div class="card">' +
+      '<div class="vote-row">' +
+        '<button class="votebtn' + (voted ? " voted" : "") + '" data-vote="' + item.id + '"><span class="count">' + item.votes.length + '</span><span class="label">' + (item.votes.length===1?"vote":"votes") + '</span></button>' +
+        '<div class="info">' +
+          '<div class="name"><span class="date-swatch" style="background:' + dateColor(item.id) + '"></span>' + fmtDateRange(item.start, item.end) + '</div>' +
+          (item.notes ? '<div class="meta">' + escapeHtml(item.notes) + '</div>' : '') +
+          (item.votes.length ? '<div class="avatars">' + avatarsHtml + '</div>' : "") +
+        '</div>' +
+        '<div class="row-actions">' +
+          '<button class="icon-only" data-edit="' + item.id + '" title="Edit">✎</button>' +
+          '<button class="icon-only" data-del="' + item.id + '" title="Remove">✕</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="comment-zone">' + renderComments(item) + '</div>' +
+    '</div>';
+  }
+
+  function openDateModal(existingId, prefillStart, prefillEnd){
+    var existing = existingId ? state.dates.find(function(d){ return d.id === existingId; }) : null;
+    var root = document.getElementById("modal-root");
+    var startVal = existing ? existing.start : (prefillStart || "");
+    var endVal = existing ? existing.end : (prefillEnd || "");
+    root.innerHTML =
+      '<div class="modal-backdrop"><div class="modal">' +
+        '<h3>' + (existing ? "Edit" : "Propose") + ' dates</h3>' +
+        '<div class="field"><label>Start</label><input type="date" id="date-start" value="' + escapeAttr(startVal) + '"></div>' +
+        '<div class="field"><label>End</label><input type="date" id="date-end" value="' + escapeAttr(endVal) + '"></div>' +
+        '<div class="field"><label>Notes</label><input type="text" id="date-notes" value="' + escapeAttr(existing ? existing.notes : "") + '" placeholder="optional"></div>' +
+        '<div class="actions">' +
+          '<button class="btn secondary" id="date-cancel">Cancel</button>' +
+          '<button class="btn" id="date-save">Save</button>' +
+        '</div>' +
+      '</div></div>';
+    document.getElementById("date-cancel").onclick = function(){
+      root.innerHTML = "";
+      pendingRange = { start: null, end: null };
+      renderCalendar();
+    };
+    document.getElementById("date-save").onclick = function(){
+      var start = document.getElementById("date-start").value;
+      var end = document.getElementById("date-end").value;
+      var notes = document.getElementById("date-notes").value.trim();
+      if (!start || !end || end < start) return;
+      if (existing){
+        existing.start = start; existing.end = end; existing.notes = notes;
+        logActivity('edited dates "' + fmtDateRange(start, end) + '"');
+      } else {
+        state.dates.push({ id: uid("dates"), start: start, end: end, notes: notes, votes: [] });
+        logActivity('proposed dates "' + fmtDateRange(start, end) + '"', "join");
+      }
+      root.innerHTML = "";
+      pendingRange = { start: null, end: null };
+      scheduleSave();
+    };
+  }
+
+  function deleteDateOption(id){
+    var idx = state.dates.findIndex(function(d){ return d.id === id; });
+    if (idx === -1) return;
+    var label = fmtDateRange(state.dates[idx].start, state.dates[idx].end);
+    state.dates.splice(idx, 1);
+    logActivity('removed dates "' + label + '"', "remove");
+    scheduleSave();
+  }
+
+  function daysUntil(iso){
+    var target = new Date(iso + "T00:00:00");
+    var now = new Date();
+    var todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((target - todayMid) / 86400000);
+  }
+
+  function renderCountdown(dateLeader){
+    if (!dateLeader) return "";
+    var days = daysUntil(dateLeader.start);
+    var rangeLabel = fmtDateRange(dateLeader.start, dateLeader.end);
+    var big, label, small;
+    if (days > 30){
+      big = days; label = "days to go";
+      small = rangeLabel + " · start counting down the shifts at work.";
+    } else if (days > 7){
+      big = days; label = "days to go";
+      small = rangeLabel + " · time to start layering up.";
+    } else if (days > 1){
+      big = days; label = "days to go";
+      small = rangeLabel + " · pack list szn. 🎒";
+    } else if (days === 1){
+      big = "1"; label = "day to go";
+      small = "Tomorrow — " + rangeLabel + ". SEND IT.";
+    } else if (days === 0){
+      big = "🏔️"; label = "today";
+      small = rangeLabel + " starts now. Don't be a Jerry.";
+    } else {
+      big = "🎉"; label = "in the books";
+      small = "Hope it was epic — " + rangeLabel;
+    }
+    return '<div class="card countdown-card"><div class="countdown-big mono">' + big + '</div>' +
+      '<div class="countdown-copy"><div class="countdown-label">' + label + '</div><div class="countdown-small">' + small + '</div></div></div>';
+  }
+
+  function truncateText(s, n){
+    return s.length > n ? s.slice(0, n - 1) + "…" : s;
+  }
+
+  function statTile(value, label){
+    return '<div class="stat-tile"><div class="stat-value mono">' + escapeHtml(String(value)) + '</div><div class="stat-label">' + escapeHtml(label) + '</div></div>';
+  }
+
+  function renderStats(){
+    var checkedIn = state.participants.filter(function(p){ return p.lastSeenTs; }).length;
+    var totalVotes = ["locations","dates","lodging"].reduce(function(sum, key){
+      return sum + state[key].reduce(function(s, i){ return s + i.votes.length; }, 0);
+    }, 0);
+    var totalSpentCents = state.expenses.reduce(function(s, e){ return s + e.amountCents; }, 0);
+    var avgCents = state.participants.length ? Math.round(totalSpentCents / state.participants.length) : 0;
+    var biggest = state.expenses.slice().sort(function(a, b){ return b.amountCents - a.amountCents; })[0];
+    var totalComments = ["locations","dates","lodging"].reduce(function(sum, key){
+      return sum + state[key].reduce(function(s, i){ return s + (i.comments ? i.comments.length : 0); }, 0);
+    }, 0);
+    var tallies = {};
+    state.activity.forEach(function(a){ tallies[a.who] = (tallies[a.who] || 0) + 1; });
+    var mvpName = null, mvpCount = 0;
+    Object.keys(tallies).forEach(function(name){ if (tallies[name] > mvpCount){ mvpCount = tallies[name]; mvpName = name; } });
+
+    var html = '<div class="section-head" style="margin-top:22px;"><div><h2 style="font-size:17px;">📊 Trip Stats</h2></div></div>';
+    html += '<div class="stats-grid">';
+    html += statTile(checkedIn + " / " + state.participants.length, "Crew checked in");
+    html += statTile(totalVotes, "Votes cast");
+    html += statTile(fmtCents(totalSpentCents), "Total spent");
+    html += statTile(fmtCents(avgCents), "Avg. per person");
+    html += statTile(biggest ? fmtCents(biggest.amountCents) : "—", biggest ? "Biggest: " + truncateText(biggest.description, 18) : "Biggest expense");
+    html += statTile(totalComments, "Comments posted");
+    html += statTile(mvpName || "—", "MVP (most active)");
+    html += statTile(state.gear.length + state.glossary.length, "Resources logged");
+    html += '</div>';
+    return html;
+  }
+
+  function renderOverview(){
+    function leader(listKey){
+      var list = state[listKey];
+      if (!list.length) return null;
+      var top = list.slice().sort(function(a,b){ return b.votes.length - a.votes.length; })[0];
+      return top.votes.length ? top : null;
+    }
+    var locLeader = leader("locations");
+    var dateLeader = leader("dates");
+    var lodgeLeader = leader("lodging");
+    var totalCents = state.expenses.reduce(function(s,e){ return s + e.amountCents; }, 0);
+
+    function tile(label, item, displayName){
+      return '<div class="card"><div class="meta" style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">' + label + '</div>' +
+        (item ? '<div style="font-family:var(--font-head);font-weight:700;font-size:18px;">' + escapeHtml(displayName || item.name) + '</div><div style="color:var(--text-muted);font-size:12.5px;margin-top:2px;">' + item.votes.length + ' vote' + (item.votes.length===1?"":"s") + '</div>'
+              : '<div style="color:var(--text-muted);font-size:13.5px;">No votes yet</div>') +
+        '</div>';
+    }
+
+    var html = '<div class="section-head"><div><h2>Overview</h2><p>The state of the mission.</p></div></div>';
+    html += renderCountdown(dateLeader);
+    html += '<div class="grid2">' + tile("Leading location", locLeader) + tile("Leading dates", dateLeader, dateLeader ? fmtDateRange(dateLeader.start, dateLeader.end) : null) + '</div>';
+    html += '<div class="grid2" style="margin-top:0;">' + tile("Leading lodging", lodgeLeader) +
+      '<div class="card"><div class="meta" style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Trip spend so far</div>' +
+      '<div class="mono" style="font-size:18px;font-weight:600;">' + fmtCents(totalCents) + '</div>' +
+      '<div style="color:var(--text-muted);font-size:12.5px;margin-top:2px;">' + state.expenses.length + ' expense' + (state.expenses.length===1?"":"s") + ' · ' + state.participants.length + ' people</div></div></div>';
+
+    html += renderStats();
+
+    html += '<div class="section-head" style="margin-top:22px;"><div><h2 style="font-size:17px;">The Crew</h2><p>Who\'s checked in, and when.</p></div></div>';
+    html += renderCrew();
+
+    document.getElementById("panel-overview").innerHTML = html;
+  }
+
+  function renderCrew(){
+    var mine = myId();
+    var sorted = state.participants.slice().sort(function(a,b){ return (b.lastSeenTs||0) - (a.lastSeenTs||0); });
+    var rows = sorted.map(function(p){
+      return '<div class="crew-row">' +
+        '<span class="avatar" style="background:' + (p.color || "var(--accent)") + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>' +
+        '<span class="crew-name">' + escapeHtml(p.name) + (p.id === mine ? ' <span class="you-tag">you</span>' : '') + '</span>' +
+        '<span class="crew-seen mono">' + (p.lastSeenTs ? relTime(p.lastSeenTs) : "hasn't checked in") + '</span>' +
+      '</div>';
+    }).join("");
+    return '<div class="card crew-card">' + rows + '</div>';
+  }
+
+  var expandedBalances = {};
+
+  function expenseContribution(e, personId){
+    if (!e.splitAmong.length) return 0;
+    var settled = e.settledBy || [];
+    var share = Math.floor(e.amountCents / e.splitAmong.length);
+    var remainder = e.amountCents - share * e.splitAmong.length;
+    var contribution = 0;
+    e.splitAmong.forEach(function(pid, i){
+      if (pid === e.paidBy) return;
+      if (settled.indexOf(pid) !== -1) return;
+      var portion = share + (i < remainder ? 1 : 0);
+      if (pid === personId) contribution -= portion;
+      if (e.paidBy === personId) contribution += portion;
+    });
+    return contribution;
+  }
+
+  function renderBalanceBreakdown(personId){
+    var lines = [];
+    state.expenses.forEach(function(e){
+      var c = expenseContribution(e, personId);
+      if (c === 0) return;
+      var role = e.paidBy === personId ? "you paid, owed back" : "your share";
+      lines.push({ desc: e.description, role: role, cents: c });
+    });
+    if (!lines.length){
+      return '<div class="balance-breakdown"><div class="empty" style="padding:10px;">No expenses touch this balance.</div></div>';
+    }
+    var rows = lines.map(function(l){
+      var sign = l.cents > 0 ? "+" : "−";
+      var cls = l.cents > 0 ? "owed" : "owes";
+      return '<div class="breakdown-row"><span class="breakdown-desc">' + escapeHtml(l.desc) + ' <span class="breakdown-role">(' + l.role + ')</span></span>' +
+        '<span class="mono breakdown-amt ' + cls + '">' + sign + fmtCents(Math.abs(l.cents)) + '</span></div>';
+    }).join("");
+    return '<div class="balance-breakdown">' + rows + '</div>';
+  }
+
+  function renderBudget(){
+    var bal = computeBalances();
+    var settlements = computeSettlements(bal);
+    var totalSpentCents = state.expenses.reduce(function(s,e){ return s + e.amountCents; }, 0);
+    var outstandingCents = Object.keys(bal).reduce(function(s,id){ return s + Math.max(bal[id], 0); }, 0);
+    var html = '<div class="section-head"><div><h2>Budget</h2><p>Log what you paid for — we\'ll do the awkward math so you don\'t have to.</p></div><button class="btn" id="add-expense">+ Add expense</button></div>';
+
+    html += '<div class="grid2" style="margin-bottom:14px;">' +
+      '<div class="card"><div class="meta" style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Total spent</div><div class="mono" style="font-size:18px;font-weight:600;">' + fmtCents(totalSpentCents) + '</div></div>' +
+      '<div class="card"><div class="meta" style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Still being sorted out</div><div class="mono" style="font-size:18px;font-weight:600;">' + fmtCents(outstandingCents) + '</div></div>' +
+    '</div>';
+
+    html += '<div class="stack">';
+    state.participants.forEach(function(p){
+      var v = bal[p.id] || 0;
+      var cls = v > 0 ? "owed" : (v < 0 ? "owes" : "even");
+      var text = v > 0 ? "is owed " + fmtCents(v) : (v < 0 ? "owes " + fmtCents(-v) : "settled up");
+      var isOpen = !!expandedBalances[p.id];
+      html += '<div class="card balance-card">' +
+        '<div class="balance-row" data-balance-toggle="' + p.id + '">' +
+          '<span class="avatar" style="background:' + (p.color || "var(--accent)") + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>' +
+          '<div class="balance-info"><div class="balance-name">' + escapeHtml(p.name) + '</div><div class="balance-sub">' + text + '</div></div>' +
+          '<span class="balance-pill ' + cls + '">' + (v === 0 ? "$0.00" : (v > 0 ? "+" : "−") + fmtCents(Math.abs(v))) + '</span>' +
+          '<span class="balance-caret">' + (isOpen ? "▾" : "▸") + '</span>' +
+        '</div>' +
+        (isOpen ? renderBalanceBreakdown(p.id) : "") +
+      '</div>';
+    });
+    html += '</div>';
+
+    html += '<div class="card" style="margin-top:14px;"><div style="font-weight:600;font-size:13.5px;margin-bottom:10px;">🤝 Suggested settle-up</div>';
+    if (!settlements.length){
+      html += '<div style="color:var(--text-muted);font-size:13px;">Everyone\'s square — nobody owes anybody anything.</div>';
+    } else {
+      settlements.forEach(function(s){
+        html += '<div class="flow-card">' +
+          '<span class="avatar" style="background:' + participantColor(s.from) + '">' + escapeHtml(participantTag(s.from)) + '</span>' +
+          '<span class="flow-name">' + escapeHtml(participantName(s.from)) + '</span>' +
+          '<span class="flow-arrow">→</span>' +
+          '<span class="avatar" style="background:' + participantColor(s.to) + '">' + escapeHtml(participantTag(s.to)) + '</span>' +
+          '<span class="flow-name">' + escapeHtml(participantName(s.to)) + '</span>' +
+          '<span class="flow-amount mono">' + fmtCents(s.amount) + '</span>' +
+        '</div>';
+      });
+    }
+    html += '</div>';
+
+    html += '<div class="section-head" style="margin-top:22px;"><h2 style="font-size:17px;">Expenses</h2></div>';
+    if (!state.expenses.length){
+      html += '<div class="empty">No expenses logged yet.</div>';
+    } else {
+      state.expenses.slice().reverse().forEach(function(e){
+        var settled = e.settledBy || [];
+        var owers = e.splitAmong.filter(function(pid){ return pid !== e.paidBy; });
+        var allSettled = owers.length > 0 && owers.every(function(pid){ return settled.indexOf(pid) !== -1; });
+        var payerColor = participantColor(e.paidBy);
+        var chips = owers.map(function(pid){
+          var isSettled = settled.indexOf(pid) !== -1;
+          return '<button class="settle-chip' + (isSettled ? ' settled' : '') + '" data-settle-exp="' + e.id + '" data-settle-person="' + pid + '">' +
+            (isSettled ? '✓ ' : '') + escapeHtml(participantTag(pid)) + '</button>';
+        }).join("");
+        html += '<div class="card expense-card" style="border-left:3px solid ' + payerColor + ';">' +
+          '<div class="vote-row">' +
+          '<span class="avatar" style="background:' + payerColor + '" title="' + escapeAttr(participantName(e.paidBy)) + ' paid">' + escapeHtml(participantTag(e.paidBy)) + '</span>' +
+          '<div class="info">' +
+          '<div class="name">' + escapeHtml(e.description) + (allSettled ? ' <span class="balance-pill even" style="margin-left:6px;">all settled</span>' : '') + '</div>' +
+          '<div class="meta"><strong>' + escapeHtml(participantName(e.paidBy)) + '</strong> paid · split ' + e.splitAmong.length + ' way' + (e.splitAmong.length===1?"":"s") + '</div>' +
+          (owers.length ? '<div class="settle-row">' + chips + '</div>' : '') +
+          '</div><div class="amt mono" style="font-weight:600;font-size:15px;min-width:80px;">' + fmtCents(e.amountCents) + '</div>' +
+          '<div class="row-actions"><button class="icon-only" data-editexp="' + e.id + '" title="Edit">✎</button><button class="icon-only" data-delexp="' + e.id + '" title="Delete">✕</button></div>' +
+          '</div></div>';
+      });
+    }
+    document.getElementById("panel-budget").innerHTML = html;
+  }
+
+  function renderActivity(){
+    var html = '<div class="section-head"><div><h2>Activity</h2><p>Who did what.</p></div></div>';
+    if (!state.activity.length){
+      html += '<div class="empty">Nothing yet.</div>';
+    } else {
+      html += '<div class="card">';
+      state.activity.forEach(function(a){
+        var d = new Date(a.ts);
+        html += '<div class="activity-item"><span class="dot ' + (a.type || "default") + '"></span><span class="when">' + d.toLocaleDateString(undefined,{month:"short",day:"numeric"}) + '</span><span><strong>' + escapeHtml(a.who) + '</strong> ' + escapeHtml(a.text) + '</span></div>';
+      });
+      html += '</div>';
+    }
+    document.getElementById("panel-activity").innerHTML = html;
+  }
+
+  function renderIdentityChip(){
+    var m = me();
+    document.getElementById("identity-name").textContent = m ? m.name : "Pick your name";
+    var av = document.getElementById("identity-avatar");
+    av.textContent = m ? (m.tag || initials(m.name)) : "?";
+    av.style.background = m && m.color ? m.color : "var(--text-muted)";
+  }
+
+  // ---------- presence (true real-time, via Firebase connection state) ----------
+
+  var presenceConnected = false;
+
+  function registerPresence(){
+    var m = me();
+    if (!m || !presenceConnected) return;
+    var myPresRef = db.ref("presence/" + m.id);
+    myPresRef.onDisconnect().remove();
+    myPresRef.set({
+      name: m.name, tag: m.tag || "", color: m.color || "",
+      ts: firebase.database.ServerValue.TIMESTAMP
+    });
+  }
+
+  function setupPresence(){
+    db.ref(".info/connected").on("value", function(snap){
+      presenceConnected = snap.val() === true;
+      if (presenceConnected) registerPresence();
+    });
+    db.ref("presence").on("value", function(snap){
+      renderPresence(snap.val() || {});
+    });
+  }
+
+  function renderPresence(presenceMap){
+    var el = document.getElementById("presence-widget");
+    if (!el) return;
+    var ids = Object.keys(presenceMap);
+    if (!ids.length){
+      el.classList.add("hidden");
+      el.innerHTML = "";
+      return;
+    }
+    el.classList.remove("hidden");
+    var mine = myId();
+    var people = ids.map(function(id){
+      var p = presenceMap[id];
+      return { id: id, name: p.name, tag: p.tag, color: p.color };
+    });
+    var avatarsHtml = people.slice(0, 6).map(function(p){
+      return '<span class="avatar" style="background:' + (p.color || "var(--accent)") + '" title="' + escapeAttr(p.name) + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>';
+    }).join("");
+    var label;
+    if (people.length === 1){
+      label = people[0].id === mine ? "just you, right now" : people[0].name + " is around";
+    } else {
+      label = people.length + " around right now";
+    }
+    el.innerHTML = '<span class="presence-dot"></span><span class="presence-avatars">' + avatarsHtml + '</span><span class="presence-label">' + escapeHtml(label) + '</span>';
+  }
+
+  function renderBrandSub(){
+    var n = state.participants.filter(function(p){ return p.lastSeenTs; }).length;
+    var total = state.participants.length;
+    var text = n === 0 ? "Nobody's checked in yet" : n + " of " + total + " checked in";
+    document.getElementById("trip-sub").textContent = text;
+  }
+
+  function renderAll(){
+    renderOverview();
+    renderListPanel("locations");
+    renderDatesPanel();
+    renderListPanel("lodging");
+    renderFlights();
+    renderItinerary();
+    renderResources();
+    renderBudget();
+    renderActivity();
+    renderIdentityChip();
+    renderBrandSub();
+  }
+
+  // ---------- events ----------
+
+  function activateTab(key){
+    document.querySelectorAll("nav.tabs button[data-tab]").forEach(function(b){
+      b.classList.toggle("active", b.dataset.tab === key);
+    });
+    document.querySelectorAll(".panel").forEach(function(p){
+      p.classList.toggle("active", p.id === "panel-" + key);
+    });
+  }
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest("[data-tab]");
+    if (btn) activateTab(btn.dataset.tab);
+  });
+
+  var TAB_ORDER_KEY = "skitrip2027_taborder";
+
+  function applySavedTabOrder(){
+    var nav = document.getElementById("tabs");
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(TAB_ORDER_KEY) || "null"); } catch(e){}
+    if (!saved || !Array.isArray(saved)) return;
+    var buttons = Array.prototype.slice.call(nav.querySelectorAll("button[data-tab]"));
+    var byKey = {};
+    buttons.forEach(function(b){ byKey[b.dataset.tab] = b; });
+    saved.forEach(function(key){ if (byKey[key]) nav.appendChild(byKey[key]); });
+    buttons.forEach(function(b){ if (saved.indexOf(b.dataset.tab) === -1) nav.appendChild(b); });
+  }
+
+  function saveTabOrder(){
+    var nav = document.getElementById("tabs");
+    var order = Array.prototype.map.call(nav.querySelectorAll("button[data-tab]"), function(b){ return b.dataset.tab; });
+    try { localStorage.setItem(TAB_ORDER_KEY, JSON.stringify(order)); } catch(e){}
+  }
+
+  applySavedTabOrder();
+
+  nav_drag_delegate();
+  function nav_drag_delegate(){
+    var nav = document.getElementById("tabs");
+    var dragBtn = null;
+
+    nav.addEventListener("dragstart", function(e){
+      var btn = e.target.closest("button[data-tab]");
+      if (!btn) return;
+      dragBtn = btn;
+      if (e.dataTransfer){
+        e.dataTransfer.effectAllowed = "move";
+        try { e.dataTransfer.setData("text/plain", btn.dataset.tab); } catch(err){}
+      }
+      btn.classList.add("dragging");
+    });
+
+    nav.addEventListener("dragend", function(){
+      if (dragBtn) dragBtn.classList.remove("dragging");
+      dragBtn = null;
+    });
+
+    nav.addEventListener("dragover", function(e){
+      if (!dragBtn) return;
+      var btn = e.target.closest("button[data-tab]");
+      if (!btn || btn === dragBtn) return;
+      e.preventDefault();
+      var rect = btn.getBoundingClientRect();
+      var before = (e.clientX - rect.left) < rect.width / 2;
+      nav.insertBefore(dragBtn, before ? btn : btn.nextSibling);
+    });
+
+    nav.addEventListener("drop", function(e){
+      if (!dragBtn) return;
+      e.preventDefault();
+      saveTabOrder();
+      dragBtn = null;
+    });
+  }
+
+  document.getElementById("identity-chip").addEventListener("click", function(){
+    promptIdentity(true);
+  });
+
+  document.getElementById("theme-toggle").addEventListener("click", function(){
+    var root = document.documentElement;
+    var cur = root.getAttribute("data-theme") || "dark";
+    var next = cur === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("skitrip2027_theme", next); } catch(e){}
+  });
+
+  document.getElementById("modal-root").addEventListener("click", function(e){
+    if (e.target.classList && e.target.classList.contains("modal-backdrop")){
+      e.target.parentElement.innerHTML = "";
+    }
+  });
+
+  function cardListKey(el){
+    var host = el.closest("[data-list]");
+    if (host) return host.dataset.list;
+    var panel = el.closest(".panel");
+    return panel ? panel.id.replace("panel-", "") : null;
+  }
+
+  main_click_delegate();
+  function main_click_delegate(){
+    document.querySelector("main").addEventListener("click", function(e){
+      var t = e.target;
+      var voteBtn = t.closest("[data-vote]");
+      if (voteBtn){
+        var panel = cardListKey(voteBtn);
+        var list = state[panel];
+        var item = list.find(function(i){ return i.id === voteBtn.dataset.vote; });
+        var label = panel === "dates" && item ? fmtDateRange(item.start, item.end) : (item && item.name);
+        toggleVote(list, voteBtn.dataset.vote, label);
+        return;
+      }
+      var addBtn = t.closest("[data-add]");
+      if (addBtn){
+        if (addBtn.dataset.add === "dates") openDateModal(); else addOrEditItem(addBtn.dataset.add);
+        return;
+      }
+      var editBtn = t.closest("[data-edit]");
+      if (editBtn){
+        var panel2 = cardListKey(editBtn);
+        if (panel2 === "dates") openDateModal(editBtn.dataset.edit); else addOrEditItem(panel2, editBtn.dataset.edit);
+        return;
+      }
+      var delBtn = t.closest("[data-del]");
+      if (delBtn){
+        var panel3 = cardListKey(delBtn);
+        if (panel3 === "dates") deleteDateOption(delBtn.dataset.del); else deleteItem(panel3, delBtn.dataset.del);
+        return;
+      }
+      if (t.closest("#add-expense")){ openExpenseModal(); return; }
+      var editExp = t.closest("[data-editexp]");
+      if (editExp){ openExpenseModal(editExp.dataset.editexp); return; }
+      var delExp = t.closest("[data-delexp]");
+      if (delExp){ deleteExpense(delExp.dataset.delexp); return; }
+      var settleBtn = t.closest("[data-settle-exp]");
+      if (settleBtn){ toggleSettled(settleBtn.dataset.settleExp, settleBtn.dataset.settlePerson); return; }
+      var balanceToggle = t.closest("[data-balance-toggle]");
+      if (balanceToggle){
+        var bid = balanceToggle.dataset.balanceToggle;
+        expandedBalances[bid] = !expandedBalances[bid];
+        renderBudget();
+        return;
+      }
+      var commentToggle = t.closest("[data-comment-toggle]");
+      if (commentToggle){
+        var cid = commentToggle.dataset.commentToggle;
+        expandedComments[cid] = !expandedComments[cid];
+        renderAll();
+        return;
+      }
+      var commentAdd = t.closest("[data-comment-add]");
+      if (commentAdd){
+        var addInput = document.querySelector('[data-comment-input="' + commentAdd.dataset.commentAdd + '"]');
+        addComment(commentAdd.dataset.commentAdd, addInput ? addInput.value : "");
+        return;
+      }
+      var commentDel = t.closest("[data-comment-del]");
+      if (commentDel){ deleteComment(commentDel.dataset.commentDel, commentDel.dataset.commentId); return; }
+      var flightEdit = t.closest("[data-flight-edit]");
+      if (flightEdit){ openFlightModal(flightEdit.dataset.flightEdit); return; }
+      var calNav = t.closest("[data-cal-nav]");
+      if (calNav){
+        var dir = parseInt(calNav.dataset.calNav, 10);
+        calView.month += dir;
+        if (calView.month < 0){ calView.month = 11; calView.year--; }
+        if (calView.month > 11){ calView.month = 0; calView.year++; }
+        renderCalendar();
+        return;
+      }
+      var calDay = t.closest("[data-date]");
+      if (calDay){
+        var iso = calDay.dataset.date;
+        if (!pendingRange.start){
+          pendingRange.start = iso;
+          renderCalendar();
+        } else if (!pendingRange.end){
+          var s = pendingRange.start, e = iso;
+          if (e < s){ var tmp = s; s = e; e = tmp; }
+          pendingRange = { start: null, end: null };
+          openDateModal(null, s, e);
+        }
+        return;
+      }
+      if (t.id === "cal-clear-pending"){ pendingRange = { start: null, end: null }; renderCalendar(); return; }
+    });
+    document.querySelector("main").addEventListener("keydown", function(e){
+      if (e.key === "Enter" && e.target.matches && e.target.matches("[data-comment-input]")){
+        addComment(e.target.dataset.commentInput, e.target.value);
+      }
+    });
+  }
+
+  main_drag_delegate();
+  function main_drag_delegate(){
+    var mainEl = document.querySelector("main");
+    var dragState = null;
+
+    function clearDragOver(){
+      var prev = mainEl.querySelector(".drag-over");
+      if (prev) prev.classList.remove("drag-over");
+    }
+
+    mainEl.addEventListener("dragstart", function(e){
+      var card = e.target.closest("[data-drag-id]");
+      if (!card) return;
+      var listKey = cardListKey(card);
+      dragState = { listKey: listKey, id: card.dataset.dragId };
+      if (e.dataTransfer){
+        e.dataTransfer.effectAllowed = "move";
+        try { e.dataTransfer.setData("text/plain", card.dataset.dragId); } catch(err){}
+      }
+      card.classList.add("dragging");
+    });
+
+    mainEl.addEventListener("dragend", function(e){
+      var card = e.target.closest("[data-drag-id]");
+      if (card) card.classList.remove("dragging");
+      clearDragOver();
+      dragState = null;
+    });
+
+    mainEl.addEventListener("dragover", function(e){
+      if (!dragState) return;
+      var card = e.target.closest("[data-drag-id]");
+      if (!card || cardListKey(card) !== dragState.listKey) return;
+      e.preventDefault();
+      if (card.dataset.dragId === dragState.id) return;
+      clearDragOver();
+      card.classList.add("drag-over");
+    });
+
+    mainEl.addEventListener("drop", function(e){
+      if (!dragState) return;
+      var card = e.target.closest("[data-drag-id]");
+      clearDragOver();
+      if (!card || card.dataset.dragId === dragState.id){ dragState = null; return; }
+      e.preventDefault();
+      var listKey = dragState.listKey;
+      var draggedId = dragState.id;
+      dragState = null;
+      var list = state[listKey];
+      var fromIdx = list.findIndex(function(i){ return i.id === draggedId; });
+      if (fromIdx === -1) return;
+      var rect = card.getBoundingClientRect();
+      var after = (e.clientY - rect.top) > rect.height / 2;
+      var moved = list.splice(fromIdx, 1)[0];
+      var targetIdx = list.findIndex(function(i){ return i.id === card.dataset.dragId; });
+      if (targetIdx === -1) targetIdx = list.length;
+      list.splice(after ? targetIdx + 1 : targetIdx, 0, moved);
+      logActivity("reordered " + LIST_CONFIG[listKey].title.toLowerCase());
+      scheduleSave();
+    });
+  }
+
+  // ---------- boot ----------
+
+  function backfillState(){
+    // Firebase Realtime Database silently omits any field that's an empty
+    // array/object when it's written, so every field we treat as always
+    // being an array/object needs to be restored here if it's missing.
+    if (!state.trip) state.trip = JSON.parse(JSON.stringify(DEFAULT_STATE.trip));
+    if (!state.participants) state.participants = JSON.parse(JSON.stringify(DEFAULT_STATE.participants));
+    state.participants.forEach(function(p){
+      var r = ROSTER.find(function(x){ return x.id === p.id; });
+      if (r){
+        if (!p.tag) p.tag = r.tag;
+        if (!p.color) p.color = r.color;
+      }
+    });
+    ["locations", "dates", "lodging"].forEach(function(key){
+      state[key] = state[key] || [];
+      state[key].forEach(function(item){
+        item.votes = item.votes || [];
+        item.comments = item.comments || [];
+      });
+    });
+    if (!state.flights) state.flights = {};
+    if (!state.itinerary) state.itinerary = [];
+    state.expenses = state.expenses || [];
+    state.expenses.forEach(function(e){
+      e.splitAmong = e.splitAmong || [];
+      e.settledBy = e.settledBy || [];
+    });
+    if (!state.activity) state.activity = [];
+    if (!state.gear) state.gear = JSON.parse(JSON.stringify(DEFAULT_STATE.gear));
+    if (!state.glossary) state.glossary = JSON.parse(JSON.stringify(DEFAULT_STATE.glossary));
+  }
+
+  function startApp(){
+    startSync();
+    setupPresence();
+  }
+
+  // ---------- password gate ----------
+  // Soft gate only (client-side, not real security) — just keeps this off
+  // search engines and randos, not a safe for anything sensitive.
+
+  var GATE_PASSWORD = "copper";
+  var GATE_KEY = "skitrip2027_gate_ok";
+
+  function wireGate(){
+    var gate = document.getElementById("password-gate");
+    var input = document.getElementById("gate-input");
+    var errorEl = document.getElementById("gate-error");
+    function tryEnter(){
+      var val = (input.value || "").trim().toLowerCase();
+      if (val === GATE_PASSWORD){
+        try { localStorage.setItem(GATE_KEY, "1"); } catch(e){}
+        gate.classList.add("hidden");
+      } else {
+        errorEl.classList.remove("hidden");
+        input.value = "";
+        input.focus();
+      }
+    }
+    document.getElementById("gate-submit").onclick = tryEnter;
+    input.addEventListener("keydown", function(e){ if (e.key === "Enter") tryEnter(); });
+    input.focus();
+  }
+
+  (function checkGate(){
+    var ok = false;
+    try { ok = localStorage.getItem(GATE_KEY) === "1"; } catch(e){}
+    if (ok){
+      document.getElementById("password-gate").classList.add("hidden");
+    } else {
+      wireGate();
+    }
+  })();
+
+  startApp();
+})();
+</script>
