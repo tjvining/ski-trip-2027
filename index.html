@@ -313,16 +313,25 @@
   .glossary-term{flex:1; font-family:var(--font-head); font-weight:700; font-size:15px;}
   .glossary-example{margin-top:8px; font-size:13px; color:var(--text-muted); font-style:italic; border-left:2px solid var(--border); padding-left:10px;}
 
-  .day-card{padding:0;}
+  .day-card{padding:0; border-left:3px solid var(--accent); overflow:hidden;}
   .day-head{display:flex; align-items:center; gap:10px; padding:14px 16px;}
-  .day-title{flex:1; font-family:var(--font-head); font-weight:700; font-size:16px;}
+  .day-title-wrap{flex:1; min-width:0;}
+  .day-title{font-family:var(--font-head); font-weight:700; font-size:16px;}
+  .day-subtitle{color:var(--text-muted); font-size:12px; margin-top:1px;}
   .moments-list{border-top:1px solid var(--border);}
   .moment-row{display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--border);}
   .moment-row:last-child{border-bottom:none;}
-  .moment-time{flex:none; min-width:66px; font-size:12.5px; color:var(--text-muted); font-weight:600;}
+  .moment-time{
+    flex:none; min-width:60px; text-align:center; font-size:11px; font-weight:700; font-family:var(--font-mono);
+    color:var(--text-muted); background:var(--surface-2); border-radius:999px; padding:4px 8px;
+  }
   .moment-body{flex:1; min-width:0;}
   .moment-title{font-weight:600; font-size:14px;}
-  .day-card .ghost-btn{border-top:1px solid var(--border); border-left:none; border-right:none; border-bottom:none; border-radius:0 0 var(--radius) var(--radius); margin:0;}
+  .day-card .ghost-btn{
+    border:none; border-top:1px solid var(--border); border-radius:0; margin:0; width:100%;
+    color:var(--accent); font-weight:700; background:var(--surface-2);
+  }
+  .day-card .ghost-btn:hover{background:var(--surface); color:var(--accent);}
 
   .cal-card{padding:14px 16px;}
   .cal-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
@@ -338,7 +347,7 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:2px;
   }
   .cal-day:hover{border-color:var(--accent);}
-  .cal-day.empty{background:none; cursor:default; pointer-events:none;}
+  .cal-day.empty-slot{background:none; border:none; padding:0; cursor:default; pointer-events:none;}
   .cal-day.pending-start{background:var(--accent); color:var(--accent-ink); font-weight:700;}
   .cal-dots{display:flex; gap:2px; height:5px;}
   .cal-dot{width:4px; height:4px; border-radius:50%; flex:none;}
@@ -463,12 +472,12 @@
 
 <nav class="tabs" id="tabs">
   <button data-tab="overview" class="active" draggable="true" title="Drag to reorder tabs">🏔️ Overview</button>
-  <button data-tab="locations" draggable="true" title="Drag to reorder tabs">📍 Locations</button>
+  <button data-tab="locations" draggable="true" title="Drag to reorder tabs">📍 Destinations</button>
   <button data-tab="dates" draggable="true" title="Drag to reorder tabs">📅 Dates</button>
   <button data-tab="lodging" draggable="true" title="Drag to reorder tabs">🏠 Lodging</button>
   <button data-tab="flights" draggable="true" title="Drag to reorder tabs">✈️ Flights</button>
   <button data-tab="itinerary" draggable="true" title="Drag to reorder tabs">🗒️ Itinerary</button>
-  <button data-tab="resources" draggable="true" title="Drag to reorder tabs">🎒 Resources</button>
+  <button data-tab="resources" draggable="true" title="Drag to reorder tabs">🎓 Jerry School</button>
   <button data-tab="budget" draggable="true" title="Drag to reorder tabs">💸 Budget</button>
 </nav>
 
@@ -861,8 +870,8 @@
   // ---------- generic list CRUD (locations, dates, lodging) ----------
 
   var LIST_CONFIG = {
-    locations: { title: "Locations", singular: "location", subtitle: "Where are we even going?",
-      empty: "No location options yet — add Steamboat, Breck, or wherever's in the running.",
+    locations: { title: "Destinations", singular: "location", subtitle: "Where are we even going?",
+      empty: "No destination options yet — add Steamboat, Breck, or wherever's in the running.",
       fields: [
         {key:"name", label:"Name", type:"text", required:true},
         {key:"url", label:"Link", type:"url"},
@@ -1270,27 +1279,39 @@
     '</div>';
   }
 
+  function fmtDayHeading(iso){
+    if (!iso) return "";
+    var d = new Date(iso + "T00:00:00");
+    return d.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+  }
+
   function renderDayCard(day){
     var moments = sortedMoments(day);
     var momentsHtml = moments.length
       ? moments.map(function(m){ return renderMomentRow(day.id, m); }).join("")
       : '<div class="empty" style="padding:12px;">Nothing planned yet.</div>';
+    var heading = fmtDayHeading(day.date);
+    var title = day.label ? day.label : (heading || "Untitled day");
+    var subtitle = day.label && heading ? heading : "";
     return '<div class="card day-card" draggable="true" data-drag-id="' + day.id + '">' +
       '<div class="day-head">' +
         '<span class="drag-handle" title="Drag to reorder">⠿</span>' +
-        '<div class="day-title">' + escapeHtml(day.label) + '</div>' +
+        '<div class="day-title-wrap">' +
+          '<div class="day-title">' + escapeHtml(title) + '</div>' +
+          (subtitle ? '<div class="day-subtitle">' + escapeHtml(subtitle) + '</div>' : '') +
+        '</div>' +
         '<div class="row-actions">' +
           '<button class="icon-only" data-edit-day="' + day.id + '" title="Edit day">✎</button>' +
           '<button class="icon-only" data-del-day="' + day.id + '" title="Remove day">✕</button>' +
         '</div>' +
       '</div>' +
       '<div class="moments-list">' + momentsHtml + '</div>' +
-      '<button class="ghost-btn" data-add-moment="' + day.id + '">+ Add a moment</button>' +
+      '<button class="ghost-btn" data-add-moment="' + day.id + '">+ Add an event</button>' +
     '</div>';
   }
 
   function renderItinerary(){
-    var html = '<div class="section-head"><div><h2>Itinerary</h2><p>Drag days to reorder — moments sort themselves by time.</p></div><button class="btn" data-add-day>+ Add a day</button></div>';
+    var html = '<div class="section-head"><div><h2>Itinerary</h2><p>Drag days to reorder — events sort themselves by time.</p></div><button class="btn" data-add-day>+ Add a day</button></div>';
     if (!state.itinerary.length){
       html += '<div class="empty">Nothing on the itinerary yet — add the first day.</div>';
     } else {
@@ -1299,29 +1320,84 @@
     document.getElementById("panel-itinerary").innerHTML = html;
   }
 
+  function renderDayPickerMonth(year, month, selectedIso){
+    var monthName = new Date(year, month, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+    var firstWeekday = new Date(year, month, 1).getDay();
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+    var html = '<div class="cal-header">' +
+      '<button type="button" class="icon-only" data-daypick-nav="-1" title="Previous month">‹</button>' +
+      '<div class="cal-month-title">' + monthName + '</div>' +
+      '<button type="button" class="icon-only" data-daypick-nav="1" title="Next month">›</button>' +
+    '</div><div class="cal-grid">';
+    ["S","M","T","W","T","F","S"].forEach(function(w){ html += '<div class="cal-weekday">' + w + '</div>'; });
+    for (var i = 0; i < firstWeekday; i++) html += '<div class="cal-day empty-slot"></div>';
+    for (var d = 1; d <= daysInMonth; d++){
+      var iso = isoDate(year, month, d);
+      var cls = "cal-day" + (iso === selectedIso ? " pending-start" : "");
+      html += '<button type="button" class="' + cls + '" data-daypick-date="' + iso + '">' + d + '</button>';
+    }
+    html += '</div>';
+    return html;
+  }
+
   function openDayModal(existingId){
     if (blockIfGuest()) return;
     var existing = existingId ? state.itinerary.find(function(d){ return d.id === existingId; }) : null;
     var root = document.getElementById("modal-root");
+    var selected = existing ? existing.date || null : null;
+    var view = { year: 2027, month: 0 };
+    if (selected){
+      var sd = new Date(selected + "T00:00:00");
+      view = { year: sd.getFullYear(), month: sd.getMonth() };
+    }
+
+    function paint(){
+      document.getElementById("day-cal-root").innerHTML = renderDayPickerMonth(view.year, view.month, selected);
+      var display = document.getElementById("day-selected-display");
+      display.textContent = selected ? fmtDayHeading(selected) : "Tap a date above";
+      display.style.color = selected ? "var(--text)" : "var(--text-muted)";
+      document.getElementById("day-save").disabled = !selected;
+      Array.prototype.slice.call(root.querySelectorAll("[data-daypick-nav]")).forEach(function(btn){
+        btn.onclick = function(){
+          view.month += parseInt(btn.getAttribute("data-daypick-nav"), 10);
+          if (view.month < 0){ view.month = 11; view.year--; }
+          if (view.month > 11){ view.month = 0; view.year++; }
+          paint();
+        };
+      });
+      Array.prototype.slice.call(root.querySelectorAll("[data-daypick-date]")).forEach(function(btn){
+        btn.onclick = function(){
+          selected = btn.getAttribute("data-daypick-date");
+          paint();
+        };
+      });
+    }
+
     root.innerHTML =
-      '<div class="modal-backdrop"><div class="modal">' +
-        '<h3>' + (existing ? "Edit" : "Add") + ' day</h3>' +
-        '<div class="field"><label>Label</label><input type="text" id="day-label" value="' + escapeAttr(existing ? existing.label : "") + '" placeholder="e.g. Day 1 — Arrival"></div>' +
+      '<div class="modal-backdrop"><div class="modal modal-wide">' +
+        '<h3>' + (existing ? "Edit" : "Add") + ' a day</h3>' +
+        '<div class="card cal-card" id="day-cal-root"></div>' +
+        '<div class="field"><label>Selected date</label><div class="meta" id="day-selected-display" style="font-weight:600;"></div></div>' +
+        '<div class="field"><label>Name this day (optional)</label><input type="text" id="day-name" value="' + escapeAttr(existing ? existing.label || "" : "") + '" placeholder="e.g. Ski Day, Travel Day"></div>' +
         '<div class="actions">' +
           '<button class="btn secondary" id="day-cancel">Cancel</button>' +
           '<button class="btn" id="day-save">Save</button>' +
         '</div>' +
       '</div></div>';
+
+    paint();
+
     document.getElementById("day-cancel").onclick = function(){ root.innerHTML = ""; };
     document.getElementById("day-save").onclick = function(){
-      var label = document.getElementById("day-label").value.trim();
-      if (!label) return;
+      if (!selected) return;
+      var label = document.getElementById("day-name").value.trim();
+      var heading = fmtDayHeading(selected);
       if (existing){
-        existing.label = label;
-        logActivity('edited "' + label + '" in itinerary');
+        existing.date = selected; existing.label = label;
+        logActivity('edited "' + (label || heading) + '" in itinerary');
       } else {
-        state.itinerary.push({ id: uid("day"), label: label, moments: [] });
-        logActivity('added "' + label + '" to itinerary', "join");
+        state.itinerary.push({ id: uid("day"), date: selected, label: label, moments: [] });
+        logActivity('added "' + (label || heading) + '" to itinerary', "join");
       }
       root.innerHTML = "";
       scheduleSave();
@@ -1332,10 +1408,15 @@
     if (blockIfGuest()) return;
     var idx = state.itinerary.findIndex(function(d){ return d.id === id; });
     if (idx === -1) return;
-    var label = state.itinerary[idx].label;
+    var removedDay = state.itinerary[idx];
+    var label = removedDay.label || fmtDayHeading(removedDay.date) || "day";
     state.itinerary.splice(idx, 1);
     logActivity('removed "' + label + '" from itinerary', "remove");
     scheduleSave();
+  }
+
+  function dayDisplayName(day){
+    return day.label || fmtDayHeading(day.date) || "this day";
   }
 
   function openMomentModal(dayId, existingId){
@@ -1347,7 +1428,7 @@
     var root = document.getElementById("modal-root");
     root.innerHTML =
       '<div class="modal-backdrop"><div class="modal">' +
-        '<h3>' + (existing ? "Edit" : "Add") + ' moment — ' + escapeHtml(day.label) + '</h3>' +
+        '<h3>' + (existing ? "Edit" : "Add") + ' event — ' + escapeHtml(dayDisplayName(day)) + '</h3>' +
         '<div class="field"><label>Time</label><input type="time" id="moment-time" value="' + escapeAttr(existing ? existing.time || "" : "") + '"></div>' +
         '<div class="field"><label>What</label><input type="text" id="moment-title" value="' + escapeAttr(existing ? existing.title : "") + '" placeholder="e.g. Group dinner"></div>' +
         '<div class="field"><label>Notes</label><input type="text" id="moment-notes" value="' + escapeAttr(existing ? existing.notes || "" : "") + '"></div>' +
@@ -1364,10 +1445,10 @@
       if (!title) return;
       if (existing){
         existing.time = time; existing.title = title; existing.notes = notes;
-        logActivity('edited "' + title + '" on ' + day.label);
+        logActivity('edited "' + title + '" on ' + dayDisplayName(day));
       } else {
         day.moments.push({ id: uid("moment"), time: time, title: title, notes: notes });
-        logActivity('added "' + title + '" to ' + day.label, "join");
+        logActivity('added "' + title + '" to ' + dayDisplayName(day), "join");
       }
       root.innerHTML = "";
       scheduleSave();
@@ -1382,7 +1463,7 @@
     if (idx === -1) return;
     var title = day.moments[idx].title;
     day.moments.splice(idx, 1);
-    logActivity('removed "' + title + '" from ' + day.label, "remove");
+    logActivity('removed "' + title + '" from ' + dayDisplayName(day), "remove");
     scheduleSave();
   }
 
@@ -1403,7 +1484,11 @@
 
   function renderFlightRow(f){
     var route = (f.from || "?") + " → " + (f.to || "?");
-    var when = [fmtFlightDate(f.date), f.time ? fmtTime12(f.time) : ""].filter(Boolean).join(" · ");
+    var timesPart = "";
+    if (f.time && f.landTime) timesPart = fmtTime12(f.time) + " → " + fmtTime12(f.landTime);
+    else if (f.time) timesPart = "Departs " + fmtTime12(f.time);
+    else if (f.landTime) timesPart = "Lands " + fmtTime12(f.landTime);
+    var when = [fmtFlightDate(f.date), timesPart].filter(Boolean).join(" · ");
     var subline = [f.flight, when].filter(Boolean).join(" · ");
     var people = f.people || [];
     var avatarsHtml = people.map(function(pid){
@@ -1455,9 +1540,10 @@
           '<div class="field"><label>From</label><input type="text" id="fl-from" value="' + escapeAttr(existing ? existing.from || "" : "") + '" placeholder="e.g. JFK"></div>' +
           '<div class="field"><label>To</label><input type="text" id="fl-to" value="' + escapeAttr(existing ? existing.to || "" : "") + '" placeholder="e.g. HDN"></div>' +
         '</div>' +
+        '<div class="field"><label>Date</label><input type="date" id="fl-date" value="' + escapeAttr(existing ? existing.date || "" : "") + '"></div>' +
         '<div class="grid2">' +
-          '<div class="field"><label>Date</label><input type="date" id="fl-date" value="' + escapeAttr(existing ? existing.date || "" : "") + '"></div>' +
-          '<div class="field"><label>Time</label><input type="time" id="fl-time" value="' + escapeAttr(existing ? existing.time || "" : "") + '"></div>' +
+          '<div class="field"><label>Departs</label><input type="time" id="fl-time" value="' + escapeAttr(existing ? existing.time || "" : "") + '"></div>' +
+          '<div class="field"><label>Lands</label><input type="time" id="fl-land-time" value="' + escapeAttr(existing ? existing.landTime || "" : "") + '"></div>' +
         '</div>' +
         '<div class="field"><label>Notes</label><input type="text" id="fl-notes" value="' + escapeAttr(existing ? existing.notes || "" : "") + '" placeholder="layover, confirmation #, etc."></div>' +
         '<div class="field"><label>Who\'s on this flight?</label><div class="split-grid" id="fl-people-grid">' + peopleGridHtml + '</div></div>' +
@@ -1476,6 +1562,7 @@
       var to = document.getElementById("fl-to").value.trim();
       var date = document.getElementById("fl-date").value;
       var time = document.getElementById("fl-time").value;
+      var landTime = document.getElementById("fl-land-time").value;
       var notes = document.getElementById("fl-notes").value.trim();
       var people = Array.prototype.slice.call(root.querySelectorAll("[data-flight-person]"))
         .filter(function(b){ return b.classList.contains("selected"); })
@@ -1483,10 +1570,10 @@
       if (!from && !to && !flight) return;
       if (existing){
         existing.flight = flight; existing.from = from; existing.to = to;
-        existing.date = date; existing.time = time; existing.notes = notes; existing.people = people;
+        existing.date = date; existing.time = time; existing.landTime = landTime; existing.notes = notes; existing.people = people;
         logActivity('edited a flight (' + from + ' → ' + to + ')', "default");
       } else {
-        state.flights.push({ id: uid("flight"), flight: flight, from: from, to: to, date: date, time: time, notes: notes, people: people });
+        state.flights.push({ id: uid("flight"), flight: flight, from: from, to: to, date: date, time: time, landTime: landTime, notes: notes, people: people });
         logActivity('added a flight (' + from + ' → ' + to + ')', "join");
       }
       root.innerHTML = "";
@@ -1506,8 +1593,25 @@
 
   // ---------- resources (gear + glossary) ----------
 
+  function linkify(text){
+    if (!text) return "";
+    var re = /\b((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9][a-zA-Z0-9-]*(?:\.[a-zA-Z0-9-]+)*\.(?:com|net|org|io|co|gov|edu|us)(?:\/[^\s<]*)?)\b/gi;
+    var out = "";
+    var lastIndex = 0;
+    var m;
+    while ((m = re.exec(text)) !== null){
+      out += escapeHtml(text.slice(lastIndex, m.index));
+      var raw = m[0];
+      var href = /^https?:\/\//i.test(raw) ? raw : "https://" + raw;
+      out += '<a href="' + escapeAttr(href) + '" target="_blank" rel="noopener">' + escapeHtml(raw) + '</a>';
+      lastIndex = m.index + raw.length;
+    }
+    out += escapeHtml(text.slice(lastIndex));
+    return out;
+  }
+
   function nlToBr(text){
-    return escapeHtml(text).replace(/\n/g, "<br>");
+    return linkify(text).replace(/\n/g, "<br>");
   }
 
   function renderGearRow(item){
@@ -1545,7 +1649,7 @@
 
   function renderResources(){
     var gearCfg = LIST_CONFIG.gear, glossCfg = LIST_CONFIG.glossary;
-    var html = '<div class="section-head"><div><h2>🎒 Resources</h2><p>Don\'t be a Jerry. Read up.</p></div></div>';
+    var html = '<div class="section-head"><div><h2>🎓 Jerry School</h2><p>Don\'t be a Jerry. Read up.</p></div></div>';
 
     html += '<div class="section-head" style="margin-top:4px;"><div><h3 style="font-family:var(--font-head);font-size:16px;">What to Wear on the Mountain</h3></div><button class="btn" data-add="gear">+ Add item</button></div>';
     if (!state.gear.length){
@@ -1602,7 +1706,7 @@
     var daysInMonth = new Date(y, m + 1, 0).getDate();
     var html = '<div class="cal-month"><div class="cal-month-title">' + monthName + '</div><div class="cal-grid">';
     ["S","M","T","W","T","F","S"].forEach(function(w){ html += '<div class="cal-weekday">' + w + '</div>'; });
-    for (var i = 0; i < firstWeekday; i++) html += '<div class="cal-day empty"></div>';
+    for (var i = 0; i < firstWeekday; i++) html += '<div class="cal-day empty-slot"></div>';
     for (var d = 1; d <= daysInMonth; d++){
       var iso = isoDate(y, m, d);
       var props = proposalsForDate(iso);
@@ -1798,7 +1902,7 @@
     html += statTile(biggest ? fmtCents(biggest.amountCents) : "—", biggest ? "Biggest: " + truncateText(biggest.description, 18) : "Biggest expense");
     html += statTile(totalComments, "Comments posted");
     html += statTile(mvpName || "—", "MVP (most active)");
-    html += statTile(state.gear.length + state.glossary.length, "Resources logged");
+    html += statTile(state.gear.length + state.glossary.length, "Jerry School entries");
     html += '</div>';
     return html;
   }
@@ -1824,7 +1928,7 @@
 
     var html = '<div class="section-head"><div><h2>Overview</h2><p>The state of the mission.</p></div></div>';
     html += renderCountdown(dateLeader);
-    html += '<div class="grid2">' + tile("Leading location", locLeader) + tile("Leading dates", dateLeader, dateLeader ? fmtDateRange(dateLeader.start, dateLeader.end) : null) + '</div>';
+    html += '<div class="grid2">' + tile("Leading destination", locLeader) + tile("Leading dates", dateLeader, dateLeader ? fmtDateRange(dateLeader.start, dateLeader.end) : null) + '</div>';
     html += '<div class="grid2" style="margin-top:0;">' + tile("Leading lodging", lodgeLeader) +
       '<div class="card"><div class="meta" style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Trip spend so far</div>' +
       '<div class="mono" style="font-size:18px;font-weight:600;">' + fmtCents(totalCents) + '</div>' +
