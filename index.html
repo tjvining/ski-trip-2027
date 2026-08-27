@@ -2135,6 +2135,7 @@
     nav.addEventListener("dragend", function(){
       if (dragBtn) dragBtn.classList.remove("dragging");
       dragBtn = null;
+      saveTabOrder();
     });
 
     nav.addEventListener("dragover", function(e){
