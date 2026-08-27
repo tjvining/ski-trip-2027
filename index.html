@@ -109,6 +109,9 @@
     background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
     padding:14px 16px; margin-bottom:10px;
   }
+  .card.has-photo{padding:0; overflow:hidden;}
+  .card.has-photo .card-body{padding:14px 16px;}
+  .lodging-photo{display:block; width:100%; height:150px; object-fit:cover; background:var(--surface-2);}
   .stack{display:flex; flex-direction:column; gap:10px;}
   .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   @media (max-width:640px){.grid2{grid-template-columns:1fr;}}
@@ -252,6 +255,8 @@
     width:100%; max-width:380px; max-height:85vh; overflow-y:auto;
   }
   .modal h3{font-size:17px; margin-bottom:6px;}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .modal-head h3{margin-bottom:0;}
   .modal p{color:var(--text-muted); font-size:13.5px; margin:0 0 14px;}
   .modal .actions{display:flex; gap:8px; justify-content:flex-end; margin-top:14px;}
 
@@ -298,9 +303,6 @@
   .payer-btn.selected{border-color:var(--accent); background:var(--surface); color:var(--text); box-shadow:0 0 0 1px var(--accent);}
   .split-btn.selected{border-color:var(--good); background:var(--good-bg); color:var(--good);}
 
-  .flight-card .flight-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
-  .flight-card .flight-couple{font-family:var(--font-head); font-weight:700; font-size:15px;}
-  .flight-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13.5px;}
   .flight-label{color:var(--text-muted); font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:2px;}
 
   .wrap-text{white-space:pre-line; font-size:13.5px; line-height:1.5;}
@@ -311,9 +313,16 @@
   .glossary-term{flex:1; font-family:var(--font-head); font-weight:700; font-size:15px;}
   .glossary-example{margin-top:8px; font-size:13px; color:var(--text-muted); font-style:italic; border-left:2px solid var(--border); padding-left:10px;}
 
-  .itin-when{flex:none; min-width:64px; text-align:center;}
-  .itin-day{font-weight:600; font-size:12.5px;}
-  .itin-time{color:var(--text-muted); font-size:11px; margin-top:2px;}
+  .day-card{padding:0;}
+  .day-head{display:flex; align-items:center; gap:10px; padding:14px 16px;}
+  .day-title{flex:1; font-family:var(--font-head); font-weight:700; font-size:16px;}
+  .moments-list{border-top:1px solid var(--border);}
+  .moment-row{display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--border);}
+  .moment-row:last-child{border-bottom:none;}
+  .moment-time{flex:none; min-width:66px; font-size:12.5px; color:var(--text-muted); font-weight:600;}
+  .moment-body{flex:1; min-width:0;}
+  .moment-title{font-weight:600; font-size:14px;}
+  .day-card .ghost-btn{border-top:1px solid var(--border); border-left:none; border-right:none; border-bottom:none; border-radius:0 0 var(--radius) var(--radius); margin:0;}
 
   .cal-card{padding:14px 16px;}
   .cal-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
@@ -446,7 +455,7 @@
     </div>
   </div>
   <div class="topbar-right">
-    <button class="ghost-link" data-tab="activity" title="View activity log">📜 Activity</button>
+    <button class="ghost-link" id="activity-open" title="View activity log">📜 Activity</button>
     <button class="iconbtn" id="theme-toggle" title="Toggle theme">◐</button>
     <div class="chip" id="identity-chip"><span class="avatar" id="identity-avatar">?</span><span id="identity-name">Pick your name</span></div>
   </div>
@@ -473,7 +482,6 @@
   <div class="panel" id="panel-itinerary"></div>
   <div class="panel" id="panel-resources"></div>
   <div class="panel" id="panel-budget"></div>
-  <div class="panel" id="panel-activity"></div>
 </main>
 
 
@@ -516,7 +524,7 @@
     ],
     dates: [],
     lodging: [],
-    flights: {},
+    flights: [],
     itinerary: [],
     gear: [
       { id:"gear-jacket", item:"Ski Jacket",
@@ -629,7 +637,7 @@
       locations: remapVotes(loaded.locations && loaded.locations.length ? loaded.locations : DEFAULT_STATE.locations),
       dates: remapVotes(loaded.dates),
       lodging: remapVotes(loaded.lodging),
-      flights: {},
+      flights: [],
       itinerary: [],
       expenses: expenses,
       activity: loaded.activity || []
@@ -674,7 +682,7 @@
       renderAll();
       if (!stateLoaded){
         stateLoaded = true;
-        if (!me()) promptIdentity(false);
+        if (!me() && !isGuest()) promptIdentity(false);
       }
     }, function(){
       if (!state){
@@ -717,6 +725,7 @@
   // ---------- identity ----------
 
   var LS_KEY = "skitrip2027_participant_id";
+  var GUEST_KEY = "skitrip2027_guest";
 
   function myId(){ return localStorage.getItem(LS_KEY); }
   function me(){
@@ -725,6 +734,23 @@
     return state.participants.find(function(p){ return p.id === id; }) || null;
   }
   function setMyId(id){ localStorage.setItem(LS_KEY, id); }
+  function isGuest(){
+    try { return localStorage.getItem(GUEST_KEY) === "1"; } catch(e){ return false; }
+  }
+  function setGuest(){
+    try {
+      localStorage.setItem(GUEST_KEY, "1");
+      localStorage.removeItem(LS_KEY);
+    } catch(e){}
+  }
+  function clearGuest(){
+    try { localStorage.removeItem(GUEST_KEY); } catch(e){}
+  }
+  function blockIfGuest(){
+    if (!isGuest()) return false;
+    showBanner("You're viewing as a guest — pick your name (top right) to make changes.");
+    return true;
+  }
 
   function initials(name){
     var parts = name.trim().split(/\s+/);
@@ -783,12 +809,14 @@
         '<h3>Who\'s this?</h3>' +
         '<p>Pick your name — this device will remember it.</p>' +
         '<div class="identity-grid">' + groups + '</div>' +
+        '<button class="ghost-btn" id="identity-guest" style="margin-top:12px;">👀 Just looking — continue as a guest</button>' +
         (forceSwitch ? '<div class="actions"><button class="btn secondary" id="identity-cancel">Cancel</button></div>' : '') +
       '</div></div>';
 
     Array.prototype.slice.call(root.querySelectorAll("[data-pick]")).forEach(function(btn){
       btn.onclick = function(){ selectIdentity(btn.dataset.pick); };
     });
+    document.getElementById("identity-guest").onclick = function(){ continueAsGuest(); };
     var cancelBtn = document.getElementById("identity-cancel");
     if (cancelBtn) cancelBtn.onclick = function(){ root.innerHTML = ""; };
   }
@@ -796,6 +824,7 @@
   function selectIdentity(id){
     var p = state.participants.find(function(x){ return x.id === id; });
     if (!p) return;
+    clearGuest();
     setMyId(id);
     document.getElementById("modal-root").innerHTML = "";
     logActivity("checked in", "join");
@@ -803,9 +832,16 @@
     registerPresence();
   }
 
+  function continueAsGuest(){
+    setGuest();
+    document.getElementById("modal-root").innerHTML = "";
+    renderAll();
+  }
+
   // ---------- voting ----------
 
   function toggleVote(list, itemId, displayName){
+    if (blockIfGuest()) return;
     var m = me();
     if (!m) return promptIdentity(false);
     var item = list.find(function(i){ return i.id === itemId; });
@@ -841,15 +877,6 @@
         {key:"notes", label:"Notes", type:"text", placeholder:"price, bedrooms, distance to lifts..."}
       ]
     },
-    itinerary: { title: "Itinerary", singular: "item", noVote: true, nameField: "title",
-      empty: "Nothing on the itinerary yet — add arrival, first day on the mountain, dinner plans...",
-      fields: [
-        {key:"day", label:"Day", type:"text", required:true, placeholder:"e.g. Sat, Jan 16"},
-        {key:"time", label:"Time", type:"text", placeholder:"e.g. 3:00 PM"},
-        {key:"title", label:"What", type:"text", required:true},
-        {key:"notes", label:"Notes", type:"text"}
-      ]
-    },
     gear: { title: "What to Wear", singular: "item", noVote: true, nameField: "item", wide: true,
       empty: "No gear notes yet — add the first one.",
       fields: [
@@ -870,6 +897,7 @@
   };
 
   function addOrEditItem(listKey, existingId){
+    if (blockIfGuest()) return;
     var cfg = LIST_CONFIG[listKey];
     var list = state[listKey];
     var existing = existingId ? list.find(function(i){ return i.id === existingId; }) : null;
@@ -923,6 +951,7 @@
   }
 
   function deleteItem(listKey, id){
+    if (blockIfGuest()) return;
     var list = state[listKey];
     var idx = list.findIndex(function(i){ return i.id === id; });
     if (idx === -1) return;
@@ -993,6 +1022,7 @@
   }
 
   function openExpenseModal(existingId){
+    if (blockIfGuest()) return;
     var existing = existingId ? state.expenses.find(function(e){ return e.id === existingId; }) : null;
     var root = document.getElementById("modal-root");
     var initialPayer = existing ? existing.paidBy : myId();
@@ -1054,6 +1084,7 @@
   }
 
   function deleteExpense(id){
+    if (blockIfGuest()) return;
     var idx = state.expenses.findIndex(function(e){ return e.id === id; });
     if (idx === -1) return;
     var desc = state.expenses[idx].description;
@@ -1063,6 +1094,7 @@
   }
 
   function toggleSettled(expenseId, personId){
+    if (blockIfGuest()) return;
     var e = state.expenses.find(function(x){ return x.id === expenseId; });
     if (!e) return;
     if (!e.settledBy) e.settledBy = [];
@@ -1105,6 +1137,7 @@
   function addComment(itemId, text){
     text = (text || "").trim();
     if (!text) return;
+    if (blockIfGuest()) return;
     var m = me();
     if (!m) return promptIdentity(false);
     var found = findVotableItem(itemId);
@@ -1116,6 +1149,7 @@
   }
 
   function deleteComment(itemId, commentId){
+    if (blockIfGuest()) return;
     var found = findVotableItem(itemId);
     if (!found || !found.item.comments) return;
     var idx = found.item.comments.findIndex(function(c){ return c.id === commentId; });
@@ -1149,13 +1183,23 @@
     return html;
   }
 
+  function linkPreviewImg(url){
+    return "https://api.microlink.io/?url=" + encodeURIComponent(url) + "&embed=image.url";
+  }
+
   function renderVoteRow(listKey, item, extraMeta){
     var m = me();
     var voted = m && item.votes.indexOf(m.id) !== -1;
     var avatarsHtml = item.votes.slice(0,6).map(function(pid){
       return '<span class="avatar" style="background:' + participantColor(pid) + '" title="' + escapeAttr(participantName(pid)) + '">' + escapeHtml(participantTag(pid)) + '</span>';
     }).join("");
-    return '<div class="card" draggable="true" data-drag-id="' + item.id + '">' +
+    var hasPhoto = listKey === "lodging" && item.url;
+    var photoHtml = hasPhoto
+      ? '<img class="lodging-photo" src="' + escapeAttr(linkPreviewImg(item.url)) + '" alt="" loading="lazy" onerror="this.remove()">'
+      : "";
+    return '<div class="card' + (hasPhoto ? " has-photo" : "") + '" draggable="true" data-drag-id="' + item.id + '">' +
+      photoHtml +
+      '<div class="card-body">' +
       '<div class="vote-row">' +
         '<span class="drag-handle" title="Drag to reorder">⠿</span>' +
         '<button class="votebtn' + (voted ? " voted" : "") + '" data-vote="' + item.id + '"><span class="count">' + item.votes.length + '</span><span class="label">' + (item.votes.length===1?"vote":"votes") + '</span></button>' +
@@ -1170,6 +1214,7 @@
         '</div>' +
       '</div>' +
       '<div class="comment-zone">' + renderComments(item) + '</div>' +
+      '</div>' +
     '</div>';
   }
 
@@ -1190,95 +1235,273 @@
     document.getElementById("panel-" + listKey).innerHTML = html;
   }
 
-  // ---------- itinerary ----------
+  // ---------- itinerary (days + timed moments) ----------
 
-  function renderItineraryRow(item){
-    return '<div class="card" draggable="true" data-drag-id="' + item.id + '">' +
-      '<div class="vote-row">' +
+  function fmtTime12(t){
+    if (!t) return "";
+    var parts = t.split(":");
+    var h = parseInt(parts[0], 10);
+    var m = parts[1];
+    var ampm = h >= 12 ? "PM" : "AM";
+    var h12 = h % 12; if (h12 === 0) h12 = 12;
+    return h12 + ":" + m + " " + ampm;
+  }
+
+  function sortedMoments(day){
+    return (day.moments || []).slice().sort(function(a, b){
+      if (!a.time && !b.time) return 0;
+      if (!a.time) return 1;
+      if (!b.time) return -1;
+      return a.time < b.time ? -1 : a.time > b.time ? 1 : 0;
+    });
+  }
+
+  function renderMomentRow(dayId, m){
+    return '<div class="moment-row">' +
+      '<div class="moment-time mono">' + (m.time ? escapeHtml(fmtTime12(m.time)) : "TBD") + '</div>' +
+      '<div class="moment-body">' +
+        '<div class="moment-title">' + escapeHtml(m.title) + '</div>' +
+        (m.notes ? '<div class="meta">' + escapeHtml(m.notes) + '</div>' : '') +
+      '</div>' +
+      '<div class="row-actions">' +
+        '<button class="icon-only" data-edit-moment="' + m.id + '" data-moment-day="' + dayId + '" title="Edit">✎</button>' +
+        '<button class="icon-only" data-del-moment="' + m.id + '" data-moment-day="' + dayId + '" title="Remove">✕</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderDayCard(day){
+    var moments = sortedMoments(day);
+    var momentsHtml = moments.length
+      ? moments.map(function(m){ return renderMomentRow(day.id, m); }).join("")
+      : '<div class="empty" style="padding:12px;">Nothing planned yet.</div>';
+    return '<div class="card day-card" draggable="true" data-drag-id="' + day.id + '">' +
+      '<div class="day-head">' +
         '<span class="drag-handle" title="Drag to reorder">⠿</span>' +
-        '<div class="itin-when"><div class="itin-day">' + escapeHtml(item.day) + '</div>' +
-          (item.time ? '<div class="itin-time mono">' + escapeHtml(item.time) + '</div>' : '') +
+        '<div class="day-title">' + escapeHtml(day.label) + '</div>' +
+        '<div class="row-actions">' +
+          '<button class="icon-only" data-edit-day="' + day.id + '" title="Edit day">✎</button>' +
+          '<button class="icon-only" data-del-day="' + day.id + '" title="Remove day">✕</button>' +
         '</div>' +
+      '</div>' +
+      '<div class="moments-list">' + momentsHtml + '</div>' +
+      '<button class="ghost-btn" data-add-moment="' + day.id + '">+ Add a moment</button>' +
+    '</div>';
+  }
+
+  function renderItinerary(){
+    var html = '<div class="section-head"><div><h2>Itinerary</h2><p>Drag days to reorder — moments sort themselves by time.</p></div><button class="btn" data-add-day>+ Add a day</button></div>';
+    if (!state.itinerary.length){
+      html += '<div class="empty">Nothing on the itinerary yet — add the first day.</div>';
+    } else {
+      state.itinerary.forEach(function(day){ html += renderDayCard(day); });
+    }
+    document.getElementById("panel-itinerary").innerHTML = html;
+  }
+
+  function openDayModal(existingId){
+    if (blockIfGuest()) return;
+    var existing = existingId ? state.itinerary.find(function(d){ return d.id === existingId; }) : null;
+    var root = document.getElementById("modal-root");
+    root.innerHTML =
+      '<div class="modal-backdrop"><div class="modal">' +
+        '<h3>' + (existing ? "Edit" : "Add") + ' day</h3>' +
+        '<div class="field"><label>Label</label><input type="text" id="day-label" value="' + escapeAttr(existing ? existing.label : "") + '" placeholder="e.g. Day 1 — Arrival"></div>' +
+        '<div class="actions">' +
+          '<button class="btn secondary" id="day-cancel">Cancel</button>' +
+          '<button class="btn" id="day-save">Save</button>' +
+        '</div>' +
+      '</div></div>';
+    document.getElementById("day-cancel").onclick = function(){ root.innerHTML = ""; };
+    document.getElementById("day-save").onclick = function(){
+      var label = document.getElementById("day-label").value.trim();
+      if (!label) return;
+      if (existing){
+        existing.label = label;
+        logActivity('edited "' + label + '" in itinerary');
+      } else {
+        state.itinerary.push({ id: uid("day"), label: label, moments: [] });
+        logActivity('added "' + label + '" to itinerary', "join");
+      }
+      root.innerHTML = "";
+      scheduleSave();
+    };
+  }
+
+  function deleteDay(id){
+    if (blockIfGuest()) return;
+    var idx = state.itinerary.findIndex(function(d){ return d.id === id; });
+    if (idx === -1) return;
+    var label = state.itinerary[idx].label;
+    state.itinerary.splice(idx, 1);
+    logActivity('removed "' + label + '" from itinerary', "remove");
+    scheduleSave();
+  }
+
+  function openMomentModal(dayId, existingId){
+    if (blockIfGuest()) return;
+    var day = state.itinerary.find(function(d){ return d.id === dayId; });
+    if (!day) return;
+    if (!day.moments) day.moments = [];
+    var existing = existingId ? day.moments.find(function(m){ return m.id === existingId; }) : null;
+    var root = document.getElementById("modal-root");
+    root.innerHTML =
+      '<div class="modal-backdrop"><div class="modal">' +
+        '<h3>' + (existing ? "Edit" : "Add") + ' moment — ' + escapeHtml(day.label) + '</h3>' +
+        '<div class="field"><label>Time</label><input type="time" id="moment-time" value="' + escapeAttr(existing ? existing.time || "" : "") + '"></div>' +
+        '<div class="field"><label>What</label><input type="text" id="moment-title" value="' + escapeAttr(existing ? existing.title : "") + '" placeholder="e.g. Group dinner"></div>' +
+        '<div class="field"><label>Notes</label><input type="text" id="moment-notes" value="' + escapeAttr(existing ? existing.notes || "" : "") + '"></div>' +
+        '<div class="actions">' +
+          '<button class="btn secondary" id="moment-cancel">Cancel</button>' +
+          '<button class="btn" id="moment-save">Save</button>' +
+        '</div>' +
+      '</div></div>';
+    document.getElementById("moment-cancel").onclick = function(){ root.innerHTML = ""; };
+    document.getElementById("moment-save").onclick = function(){
+      var time = document.getElementById("moment-time").value;
+      var title = document.getElementById("moment-title").value.trim();
+      var notes = document.getElementById("moment-notes").value.trim();
+      if (!title) return;
+      if (existing){
+        existing.time = time; existing.title = title; existing.notes = notes;
+        logActivity('edited "' + title + '" on ' + day.label);
+      } else {
+        day.moments.push({ id: uid("moment"), time: time, title: title, notes: notes });
+        logActivity('added "' + title + '" to ' + day.label, "join");
+      }
+      root.innerHTML = "";
+      scheduleSave();
+    };
+  }
+
+  function deleteMoment(dayId, momentId){
+    if (blockIfGuest()) return;
+    var day = state.itinerary.find(function(d){ return d.id === dayId; });
+    if (!day) return;
+    var idx = (day.moments || []).findIndex(function(m){ return m.id === momentId; });
+    if (idx === -1) return;
+    var title = day.moments[idx].title;
+    day.moments.splice(idx, 1);
+    logActivity('removed "' + title + '" from ' + day.label, "remove");
+    scheduleSave();
+  }
+
+  // ---------- flights (flat list, pick passengers per flight) ----------
+
+  function sortedFlights(){
+    return state.flights.slice().sort(function(a, b){
+      var ak = (a.date || "") + "T" + (a.time || "");
+      var bk = (b.date || "") + "T" + (b.time || "");
+      return ak < bk ? -1 : ak > bk ? 1 : 0;
+    });
+  }
+
+  function fmtFlightDate(d){
+    if (!d) return "";
+    return new Date(d + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+
+  function renderFlightRow(f){
+    var route = (f.from || "?") + " → " + (f.to || "?");
+    var when = [fmtFlightDate(f.date), f.time ? fmtTime12(f.time) : ""].filter(Boolean).join(" · ");
+    var subline = [f.flight, when].filter(Boolean).join(" · ");
+    var people = f.people || [];
+    var avatarsHtml = people.map(function(pid){
+      return '<span class="avatar" style="background:' + participantColor(pid) + '" title="' + escapeAttr(participantName(pid)) + '">' + escapeHtml(participantTag(pid)) + '</span>';
+    }).join("");
+    return '<div class="card">' +
+      '<div class="vote-row">' +
         '<div class="info">' +
-          '<div class="name">' + escapeHtml(item.title) + '</div>' +
-          (item.notes ? '<div class="meta">' + escapeHtml(item.notes) + '</div>' : '') +
+          '<div class="name">' + escapeHtml(route) + '</div>' +
+          (subline ? '<div class="meta">' + escapeHtml(subline) + '</div>' : '') +
+          (f.notes ? '<div class="meta">' + escapeHtml(f.notes) + '</div>' : '') +
+          (people.length ? '<div class="avatars">' + avatarsHtml + '</div>' : '<div class="meta">Nobody assigned yet</div>') +
         '</div>' +
         '<div class="row-actions">' +
-          '<button class="icon-only" data-edit="' + item.id + '" title="Edit">✎</button>' +
-          '<button class="icon-only" data-del="' + item.id + '" title="Remove">✕</button>' +
+          '<button class="icon-only" data-edit-flight="' + f.id + '" title="Edit">✎</button>' +
+          '<button class="icon-only" data-del-flight="' + f.id + '" title="Remove">✕</button>' +
         '</div>' +
       '</div>' +
     '</div>';
   }
 
-  function renderItinerary(){
-    var cfg = LIST_CONFIG.itinerary;
-    var list = state.itinerary;
-    var html = '<div class="section-head"><div><h2>Itinerary</h2><p>The day-by-day plan. Drag to reorder.</p></div><button class="btn" data-add="itinerary">+ Add item</button></div>';
-    if (!list.length){
-      html += '<div class="empty">' + cfg.empty + '</div>';
-    } else {
-      list.forEach(function(item){ html += renderItineraryRow(item); });
-    }
-    document.getElementById("panel-itinerary").innerHTML = html;
-  }
-
-  // ---------- flights ----------
-
   function renderFlights(){
-    var html = '<div class="section-head"><div><h2>Flights</h2><p>Who\'s flying when, so nobody\'s stranded at baggage claim.</p></div></div>';
-    COUPLES.forEach(function(c){
-      var f = state.flights[c.id];
-      html += '<div class="card flight-card">' +
-        '<div class="flight-head"><span class="flight-couple">' + escapeHtml(c.label) + '</span>' +
-        '<button class="icon-only" data-flight-edit="' + c.id + '" title="Edit">✎</button></div>';
-      if (!f || (!f.arrivalFlight && !f.departureFlight && !f.notes)){
-        html += '<div class="empty" style="padding:10px;">No flight info yet.</div>';
-      } else {
-        html += '<div class="flight-grid">' +
-          '<div><div class="flight-label">Arrival</div><div>' + (f.arrivalFlight ? escapeHtml(f.arrivalFlight) : "—") + '</div>' +
-            (f.arrivalWhen ? '<div class="meta">' + escapeHtml(f.arrivalWhen) + '</div>' : '') + '</div>' +
-          '<div><div class="flight-label">Departure</div><div>' + (f.departureFlight ? escapeHtml(f.departureFlight) : "—") + '</div>' +
-            (f.departureWhen ? '<div class="meta">' + escapeHtml(f.departureWhen) + '</div>' : '') + '</div>' +
-        '</div>';
-        if (f.notes) html += '<div class="meta" style="margin-top:8px;">' + escapeHtml(f.notes) + '</div>';
-      }
-      html += '</div>';
-    });
+    var html = '<div class="section-head"><div><h2>Flights</h2><p>Who\'s flying when, so nobody\'s stranded at baggage claim.</p></div><button class="btn" data-add-flight>+ Add flight</button></div>';
+    var flights = sortedFlights();
+    if (!flights.length){
+      html += '<div class="empty">No flights logged yet — add the first one.</div>';
+    } else {
+      flights.forEach(function(f){ html += renderFlightRow(f); });
+    }
     document.getElementById("panel-flights").innerHTML = html;
   }
 
-  function openFlightModal(coupleId){
-    var couple = COUPLES.find(function(c){ return c.id === coupleId; });
-    if (!couple) return;
-    var f = state.flights[coupleId] || {};
+  function openFlightModal(existingId){
+    if (blockIfGuest()) return;
+    var existing = existingId ? state.flights.find(function(f){ return f.id === existingId; }) : null;
     var root = document.getElementById("modal-root");
+    var peopleGridHtml = state.participants.map(function(p){
+      var checked = existing ? (existing.people || []).indexOf(p.id) !== -1 : false;
+      return '<button type="button" class="split-btn' + (checked ? ' selected' : '') + '" data-flight-person="' + p.id + '">' +
+        '<span class="avatar" style="background:' + (p.color || "var(--accent)") + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>' +
+        '<span>' + escapeHtml(p.name) + '</span>' +
+      '</button>';
+    }).join("");
     root.innerHTML =
-      '<div class="modal-backdrop"><div class="modal">' +
-        '<h3>' + escapeHtml(couple.label) + ' — flights</h3>' +
-        '<div class="field"><label>Arrival flight</label><input type="text" id="fl-arr-flight" value="' + escapeAttr(f.arrivalFlight || "") + '" placeholder="e.g. UA 1421"></div>' +
-        '<div class="field"><label>Arrival date/time</label><input type="text" id="fl-arr-when" value="' + escapeAttr(f.arrivalWhen || "") + '" placeholder="e.g. Jan 16, 2:40 PM into HDN"></div>' +
-        '<div class="field"><label>Departure flight</label><input type="text" id="fl-dep-flight" value="' + escapeAttr(f.departureFlight || "") + '" placeholder="e.g. UA 889"></div>' +
-        '<div class="field"><label>Departure date/time</label><input type="text" id="fl-dep-when" value="' + escapeAttr(f.departureWhen || "") + '" placeholder="e.g. Jan 23, 11:15 AM"></div>' +
-        '<div class="field"><label>Notes</label><input type="text" id="fl-notes" value="' + escapeAttr(f.notes || "") + '" placeholder="rental car, shuttle, etc."></div>' +
+      '<div class="modal-backdrop"><div class="modal modal-wide">' +
+        '<h3>' + (existing ? "Edit" : "Add") + ' flight</h3>' +
+        '<div class="field"><label>Airline / flight #</label><input type="text" id="fl-flight" value="' + escapeAttr(existing ? existing.flight || "" : "") + '" placeholder="e.g. United 1421"></div>' +
+        '<div class="grid2">' +
+          '<div class="field"><label>From</label><input type="text" id="fl-from" value="' + escapeAttr(existing ? existing.from || "" : "") + '" placeholder="e.g. JFK"></div>' +
+          '<div class="field"><label>To</label><input type="text" id="fl-to" value="' + escapeAttr(existing ? existing.to || "" : "") + '" placeholder="e.g. HDN"></div>' +
+        '</div>' +
+        '<div class="grid2">' +
+          '<div class="field"><label>Date</label><input type="date" id="fl-date" value="' + escapeAttr(existing ? existing.date || "" : "") + '"></div>' +
+          '<div class="field"><label>Time</label><input type="time" id="fl-time" value="' + escapeAttr(existing ? existing.time || "" : "") + '"></div>' +
+        '</div>' +
+        '<div class="field"><label>Notes</label><input type="text" id="fl-notes" value="' + escapeAttr(existing ? existing.notes || "" : "") + '" placeholder="layover, confirmation #, etc."></div>' +
+        '<div class="field"><label>Who\'s on this flight?</label><div class="split-grid" id="fl-people-grid">' + peopleGridHtml + '</div></div>' +
         '<div class="actions">' +
           '<button class="btn secondary" id="fl-cancel">Cancel</button>' +
           '<button class="btn" id="fl-save">Save</button>' +
         '</div>' +
       '</div></div>';
     document.getElementById("fl-cancel").onclick = function(){ root.innerHTML = ""; };
+    Array.prototype.slice.call(document.getElementById("fl-people-grid").querySelectorAll("[data-flight-person]")).forEach(function(btn){
+      btn.onclick = function(){ btn.classList.toggle("selected"); };
+    });
     document.getElementById("fl-save").onclick = function(){
-      state.flights[coupleId] = {
-        arrivalFlight: document.getElementById("fl-arr-flight").value.trim(),
-        arrivalWhen: document.getElementById("fl-arr-when").value.trim(),
-        departureFlight: document.getElementById("fl-dep-flight").value.trim(),
-        departureWhen: document.getElementById("fl-dep-when").value.trim(),
-        notes: document.getElementById("fl-notes").value.trim()
-      };
-      logActivity("updated flight info for " + couple.label, "default");
+      var flight = document.getElementById("fl-flight").value.trim();
+      var from = document.getElementById("fl-from").value.trim();
+      var to = document.getElementById("fl-to").value.trim();
+      var date = document.getElementById("fl-date").value;
+      var time = document.getElementById("fl-time").value;
+      var notes = document.getElementById("fl-notes").value.trim();
+      var people = Array.prototype.slice.call(root.querySelectorAll("[data-flight-person]"))
+        .filter(function(b){ return b.classList.contains("selected"); })
+        .map(function(b){ return b.dataset.flightPerson; });
+      if (!from && !to && !flight) return;
+      if (existing){
+        existing.flight = flight; existing.from = from; existing.to = to;
+        existing.date = date; existing.time = time; existing.notes = notes; existing.people = people;
+        logActivity('edited a flight (' + from + ' → ' + to + ')', "default");
+      } else {
+        state.flights.push({ id: uid("flight"), flight: flight, from: from, to: to, date: date, time: time, notes: notes, people: people });
+        logActivity('added a flight (' + from + ' → ' + to + ')', "join");
+      }
       root.innerHTML = "";
       scheduleSave();
     };
+  }
+
+  function deleteFlight(id){
+    if (blockIfGuest()) return;
+    var idx = state.flights.findIndex(function(f){ return f.id === id; });
+    if (idx === -1) return;
+    var f = state.flights[idx];
+    state.flights.splice(idx, 1);
+    logActivity('removed a flight (' + (f.from || "?") + ' → ' + (f.to || "?") + ')', "remove");
+    scheduleSave();
   }
 
   // ---------- resources (gear + glossary) ----------
@@ -1458,6 +1681,7 @@
   }
 
   function openDateModal(existingId, prefillStart, prefillEnd){
+    if (blockIfGuest()) return;
     var existing = existingId ? state.dates.find(function(d){ return d.id === existingId; }) : null;
     var root = document.getElementById("modal-root");
     var startVal = existing ? existing.start : (prefillStart || "");
@@ -1497,6 +1721,7 @@
   }
 
   function deleteDateOption(id){
+    if (blockIfGuest()) return;
     var idx = state.dates.findIndex(function(d){ return d.id === id; });
     if (idx === -1) return;
     var label = fmtDateRange(state.dates[idx].start, state.dates[idx].end);
@@ -1740,27 +1965,46 @@
     document.getElementById("panel-budget").innerHTML = html;
   }
 
-  function renderActivity(){
-    var html = '<div class="section-head"><div><h2>Activity</h2><p>Who did what.</p></div></div>';
+  function activityFeedHtml(){
     if (!state.activity.length){
-      html += '<div class="empty">Nothing yet.</div>';
-    } else {
-      html += '<div class="card">';
-      state.activity.forEach(function(a){
-        var d = new Date(a.ts);
-        html += '<div class="activity-item"><span class="dot ' + (a.type || "default") + '"></span><span class="when">' + d.toLocaleDateString(undefined,{month:"short",day:"numeric"}) + '</span><span><strong>' + escapeHtml(a.who) + '</strong> ' + escapeHtml(a.text) + '</span></div>';
-      });
-      html += '</div>';
+      return '<div class="empty">Nothing yet.</div>';
     }
-    document.getElementById("panel-activity").innerHTML = html;
+    var html = '<div class="card">';
+    state.activity.forEach(function(a){
+      var d = new Date(a.ts);
+      html += '<div class="activity-item"><span class="dot ' + (a.type || "default") + '"></span><span class="when">' + d.toLocaleDateString(undefined,{month:"short",day:"numeric"}) + '</span><span><strong>' + escapeHtml(a.who) + '</strong> ' + escapeHtml(a.text) + '</span></div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function openActivityModal(){
+    var root = document.getElementById("modal-root");
+    root.innerHTML =
+      '<div class="modal-backdrop"><div class="modal modal-wide">' +
+        '<div class="modal-head"><h3>Activity</h3><button class="icon-only" id="activity-close" title="Close">✕</button></div>' +
+        '<p>Who did what.</p>' +
+        activityFeedHtml() +
+      '</div></div>';
+    document.getElementById("activity-close").onclick = function(){ root.innerHTML = ""; };
   }
 
   function renderIdentityChip(){
     var m = me();
-    document.getElementById("identity-name").textContent = m ? m.name : "Pick your name";
     var av = document.getElementById("identity-avatar");
-    av.textContent = m ? (m.tag || initials(m.name)) : "?";
-    av.style.background = m && m.color ? m.color : "var(--text-muted)";
+    if (m){
+      document.getElementById("identity-name").textContent = m.name;
+      av.textContent = m.tag || initials(m.name);
+      av.style.background = m.color || "var(--text-muted)";
+    } else if (isGuest()){
+      document.getElementById("identity-name").textContent = "Guest (view only)";
+      av.textContent = "👀";
+      av.style.background = "var(--text-muted)";
+    } else {
+      document.getElementById("identity-name").textContent = "Pick your name";
+      av.textContent = "?";
+      av.style.background = "var(--text-muted)";
+    }
   }
 
   // ---------- presence (true real-time, via Firebase connection state) ----------
@@ -1831,7 +2075,6 @@
     renderItinerary();
     renderResources();
     renderBudget();
-    renderActivity();
     renderIdentityChip();
     renderBrandSub();
   }
@@ -1916,6 +2159,8 @@
     promptIdentity(true);
   });
 
+  document.getElementById("activity-open").addEventListener("click", openActivityModal);
+
   document.getElementById("theme-toggle").addEventListener("click", function(){
     var root = document.documentElement;
     var cur = root.getAttribute("data-theme") || "dark";
@@ -1996,8 +2241,22 @@
       }
       var commentDel = t.closest("[data-comment-del]");
       if (commentDel){ deleteComment(commentDel.dataset.commentDel, commentDel.dataset.commentId); return; }
-      var flightEdit = t.closest("[data-flight-edit]");
-      if (flightEdit){ openFlightModal(flightEdit.dataset.flightEdit); return; }
+      if (t.closest("[data-add-flight]")){ openFlightModal(); return; }
+      var editFlight = t.closest("[data-edit-flight]");
+      if (editFlight){ openFlightModal(editFlight.dataset.editFlight); return; }
+      var delFlight = t.closest("[data-del-flight]");
+      if (delFlight){ deleteFlight(delFlight.dataset.delFlight); return; }
+      if (t.closest("[data-add-day]")){ openDayModal(); return; }
+      var editDay = t.closest("[data-edit-day]");
+      if (editDay){ openDayModal(editDay.dataset.editDay); return; }
+      var delDay = t.closest("[data-del-day]");
+      if (delDay){ deleteDay(delDay.dataset.delDay); return; }
+      var addMoment = t.closest("[data-add-moment]");
+      if (addMoment){ openMomentModal(addMoment.dataset.addMoment); return; }
+      var editMoment = t.closest("[data-edit-moment]");
+      if (editMoment){ openMomentModal(editMoment.dataset.momentDay, editMoment.dataset.editMoment); return; }
+      var delMoment = t.closest("[data-del-moment]");
+      if (delMoment){ deleteMoment(delMoment.dataset.momentDay, delMoment.dataset.delMoment); return; }
       var calNav = t.closest("[data-cal-nav]");
       if (calNav){
         var dir = parseInt(calNav.dataset.calNav, 10);
@@ -2043,6 +2302,7 @@
     mainEl.addEventListener("dragstart", function(e){
       var card = e.target.closest("[data-drag-id]");
       if (!card) return;
+      if (isGuest()){ e.preventDefault(); blockIfGuest(); return; }
       var listKey = cardListKey(card);
       dragState = { listKey: listKey, id: card.dataset.dragId };
       if (e.dataTransfer){
@@ -2087,7 +2347,7 @@
       var targetIdx = list.findIndex(function(i){ return i.id === card.dataset.dragId; });
       if (targetIdx === -1) targetIdx = list.length;
       list.splice(after ? targetIdx + 1 : targetIdx, 0, moved);
-      logActivity("reordered " + LIST_CONFIG[listKey].title.toLowerCase());
+      logActivity("reordered " + (LIST_CONFIG[listKey] ? LIST_CONFIG[listKey].title.toLowerCase() : listKey));
       scheduleSave();
     });
   }
@@ -2114,8 +2374,12 @@
         item.comments = item.comments || [];
       });
     });
-    if (!state.flights) state.flights = {};
+    state.flights = state.flights || [];
+    state.flights.forEach(function(f){ f.people = f.people || []; });
     if (!state.itinerary) state.itinerary = [];
+    state.itinerary.forEach(function(day){
+      day.moments = day.moments || [];
+    });
     state.expenses = state.expenses || [];
     state.expenses.forEach(function(e){
       e.splitAmong = e.splitAmong || [];
