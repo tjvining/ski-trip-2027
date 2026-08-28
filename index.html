@@ -317,6 +317,31 @@
   .breakdown-amt{font-weight:600; flex:none;}
   .breakdown-amt.owed{color:var(--good);}
   .breakdown-amt.owes{color:var(--bad);}
+  .breakdown-total{display:flex; justify-content:space-between; gap:10px; font-size:13px; padding-top:9px; margin-top:2px; border-top:1px solid var(--border); font-weight:700;}
+  .breakdown-total .breakdown-amt{font-size:14px;}
+  .breakdown-who{margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); display:flex; flex-direction:column; gap:6px;}
+  .breakdown-who .breakdown-row{padding-top:0;}
+
+  .math-help-link{background:none; border:none; color:var(--text-muted); font-size:11.5px; cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:2px; font-family:var(--font-ui);}
+  .math-help-link:hover{color:var(--accent);}
+  .math-flow{display:flex; flex-direction:column; margin:10px 0 4px;}
+  .math-step{display:flex; gap:12px; align-items:flex-start;}
+  .math-step-num{
+    flex:none; width:26px; height:26px; border-radius:50%; background:var(--accent); color:var(--accent-ink);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12.5px; font-family:var(--font-mono); margin-top:1px;
+  }
+  .math-step-title{font-weight:700; font-size:14px; margin-bottom:3px; font-family:var(--font-head);}
+  .math-step-desc{font-size:12.5px; color:var(--text-muted); line-height:1.55;}
+  .math-step-desc b{color:var(--text); font-weight:700;}
+  .math-arrow{text-align:center; color:var(--text-muted); font-size:15px; padding:2px 0 2px 12px;}
+
+  .dest-tile-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .dest-name-link{font-family:var(--font-head); font-weight:700; font-size:18px; color:var(--text); text-decoration:none;}
+  .dest-name-link:hover{color:var(--accent);}
+  .dest-weather{display:flex; flex-direction:column; align-items:center; gap:2px; flex:none; text-decoration:none; color:inherit; padding:2px 4px; border-radius:5px;}
+  .dest-weather:hover{background:var(--surface-2);}
+  .dest-weather-icon{font-size:24px; line-height:1;}
+  .dest-weather-temp{font-size:11px; font-family:var(--font-mono); color:var(--text-muted); white-space:nowrap;}
 
   .flow-card{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border);}
   .flow-card:last-child{border-bottom:none;}
@@ -387,6 +412,14 @@
   .payer-btn:hover,.split-btn:hover{border-color:var(--accent);}
   .payer-btn.selected{border-color:var(--accent); background:var(--surface); color:var(--text); box-shadow:0 0 0 1px var(--accent);}
   .split-btn.selected{border-color:var(--good); background:var(--good-bg); color:var(--good);}
+
+  .split-value-list{margin-top:8px; border:1px solid var(--border); border-radius:5px; padding:2px 10px;}
+  .split-value-row{display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--border);}
+  .split-value-row:last-child{border-bottom:none;}
+  .split-value-row .avatar{flex:none;}
+  .split-value-name{flex:1; font-size:13px; font-weight:600; min-width:0;}
+  .split-value-row input{width:74px; flex:none; text-align:right;}
+  .split-value-suffix{color:var(--text-muted); font-size:12px; flex:none; width:36px;}
 
   .flight-label{color:var(--text-muted); font-size:10px; text-transform:uppercase; letter-spacing:.06em; margin-bottom:2px; font-family:var(--font-ui); font-weight:600;}
 
@@ -703,6 +736,7 @@
     expenses: [],
     featureRequests: [],
     chat: [],
+    settlementLog: [],
     activity: [
       {"id":"act-mtam5cgx837lo","ts":1787780160609,"who":"Tj","text":"voted for \"Steamboat Springs, CO\"","type":"vote"},
       {"id":"act-mtam52rlphy6c","ts":1787780148033,"who":"Tj","text":"removed vote for \"Breckenridge, CO\"","type":"remove"},
@@ -847,6 +881,14 @@
   }
   function markWelcomeSeen(){
     try { localStorage.setItem(WELCOME_KEY, "1"); } catch(e){}
+  }
+
+  var MATH_HELP_KEY = "skitrip2027_seen_math_help";
+  function hasSeenMathHelp(){
+    try { return localStorage.getItem(MATH_HELP_KEY) === "1"; } catch(e){ return false; }
+  }
+  function markMathHelpSeen(){
+    try { localStorage.setItem(MATH_HELP_KEY, "1"); } catch(e){}
   }
 
   function myId(){ return localStorage.getItem(LS_KEY); }
@@ -1157,22 +1199,74 @@
     return (neg ? "-$" : "$") + s;
   }
 
+  var CATEGORIES = [
+    { key: "Lodging", emoji: "🏠", label: "Lodging" },
+    { key: "Food", emoji: "🍔", label: "Food" },
+    { key: "Gear", emoji: "🎿", label: "Gear" },
+    { key: "Transport", emoji: "🚗", label: "Transport" },
+    { key: "Fun", emoji: "🎉", label: "Fun" },
+    { key: "Other", emoji: "📦", label: "Other" }
+  ];
+  function categoryMeta(key){
+    return CATEGORIES.filter(function(c){ return c.key === key; })[0] || CATEGORIES[CATEGORIES.length - 1];
+  }
+
+  // Given {amountCents, splitAmong, splitMode, splitValues}, returns {personId: portionCents}
+  // for everyone in splitAmong. Portions always sum to exactly amountCents regardless of mode,
+  // so the "balances net to zero" invariant holds no matter how the split is sliced.
+  function computeExpensePortions(e){
+    var ids = e.splitAmong || [];
+    var n = ids.length;
+    var portions = {};
+    if (!n) return portions;
+    var mode = e.splitMode || "equal";
+    var amount = e.amountCents;
+    var vals = e.splitValues || {};
+    if (mode === "exact"){
+      ids.forEach(function(id){ portions[id] = Math.round(vals[id] || 0); });
+    } else if (mode === "percent" || mode === "shares"){
+      var weightOf = mode === "percent"
+        ? function(id){ return vals[id] || 0; }
+        : function(id){ return vals[id] != null ? vals[id] : 1; };
+      var totalWeight = ids.reduce(function(s, id){ return s + weightOf(id); }, 0) || n;
+      var running = 0;
+      ids.forEach(function(id, i){
+        if (i === ids.length - 1){
+          portions[id] = amount - running;
+        } else {
+          var portion = Math.round(amount * weightOf(id) / totalWeight);
+          portions[id] = portion;
+          running += portion;
+        }
+      });
+    } else {
+      var share = Math.floor(amount / n);
+      var remainder = amount - share * n;
+      ids.forEach(function(id, i){ portions[id] = share + (i < remainder ? 1 : 0); });
+    }
+    return portions;
+  }
+
   function computeBalances(){
     var bal = {};
     state.participants.forEach(function(p){ bal[p.id] = 0; });
     state.expenses.forEach(function(e){
       if (!(e.paidBy in bal) || !e.splitAmong.length) return;
       var settled = e.settledBy || [];
-      var share = Math.floor(e.amountCents / e.splitAmong.length);
-      var remainder = e.amountCents - share * e.splitAmong.length;
-      e.splitAmong.forEach(function(pid, i){
+      var portions = computeExpensePortions(e);
+      e.splitAmong.forEach(function(pid){
         if (pid === e.paidBy) return;
         if (settled.indexOf(pid) !== -1) return;
         if (!(pid in bal)) return;
-        var portion = share + (i < remainder ? 1 : 0);
+        var portion = portions[pid] || 0;
         bal[pid] -= portion;
         bal[e.paidBy] += portion;
       });
+    });
+    (state.settlementLog || []).forEach(function(p){
+      if (!(p.from in bal) || !(p.to in bal)) return;
+      bal[p.from] += p.amountCents;
+      bal[p.to] -= p.amountCents;
     });
     return bal;
   }
@@ -1202,66 +1296,210 @@
     return p ? p.name : "Unknown";
   }
 
+  var SPLIT_MODE_LABELS = { equal: "Equal", exact: "Exact $", percent: "Percent %", shares: "Shares" };
+
   function openExpenseModal(existingId){
     if (blockIfGuest()) return;
     var existing = existingId ? state.expenses.find(function(e){ return e.id === existingId; }) : null;
     var root = document.getElementById("modal-root");
-    var initialPayer = existing ? existing.paidBy : myId();
-    var payerGridHtml = state.participants.map(function(p){
-      return '<button type="button" class="payer-btn' + (p.id === initialPayer ? ' selected' : '') + '" data-payer-pick="' + p.id + '">' +
-        '<span class="avatar" data-tip="' + escapeAttr(p.name) + '" style="background:' + (p.color || "var(--accent)") + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>' +
-        '<span>' + escapeHtml(p.name) + '</span>' +
-      '</button>';
-    }).join("");
-    var splitGridHtml = state.participants.map(function(p){
-      var checked = existing ? existing.splitAmong.indexOf(p.id) !== -1 : true;
-      return '<button type="button" class="split-btn' + (checked ? ' selected' : '') + '" data-split-toggle="' + p.id + '">' +
-        '<span class="avatar" data-tip="' + escapeAttr(p.name) + '" style="background:' + (p.color || "var(--accent)") + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>' +
-        '<span>' + escapeHtml(p.name) + '</span>' +
-      '</button>';
-    }).join("");
-    root.innerHTML =
-      '<div class="modal-backdrop"><div class="modal modal-wide">' +
-        '<h3>' + (existing ? "Edit" : "Add") + ' expense</h3>' +
-        '<div class="field"><label>Description</label><input type="text" id="exp-desc" value="' + escapeAttr(existing ? existing.description : "") + '" placeholder="e.g. Lodging deposit"></div>' +
-        '<div class="field"><label>Amount</label><input type="number" step="0.01" id="exp-amount" value="' + (existing ? (existing.amountCents/100).toFixed(2) : "") + '" placeholder="0.00"></div>' +
-        '<div class="field"><label>Who actually paid?</label><div class="payer-grid" id="exp-payer-grid">' + payerGridHtml + '</div>' +
-          '<input type="hidden" id="exp-payer" value="' + escapeAttr(initialPayer || "") + '"></div>' +
-        '<div class="field"><label>Split among</label><div class="split-grid" id="exp-split-grid">' + splitGridHtml + '</div></div>' +
-        '<div class="actions">' +
-          '<button class="btn secondary" id="exp-cancel">Cancel</button>' +
-          '<button class="btn" id="exp-save">Save</button>' +
-        '</div>' +
-      '</div></div>';
-    document.getElementById("exp-cancel").onclick = function(){ root.innerHTML = ""; };
-    Array.prototype.slice.call(document.getElementById("exp-payer-grid").querySelectorAll("[data-payer-pick]")).forEach(function(btn){
-      btn.onclick = function(){
-        document.getElementById("exp-payer").value = btn.dataset.payerPick;
-        document.getElementById("exp-payer-grid").querySelectorAll(".payer-btn").forEach(function(b){ b.classList.remove("selected"); });
-        btn.classList.add("selected");
-      };
-    });
-    Array.prototype.slice.call(document.getElementById("exp-split-grid").querySelectorAll("[data-split-toggle]")).forEach(function(btn){
-      btn.onclick = function(){ btn.classList.toggle("selected"); };
-    });
-    document.getElementById("exp-save").onclick = function(){
-      var desc = document.getElementById("exp-desc").value.trim();
-      var amount = dollarsToCents(document.getElementById("exp-amount").value);
-      var payer = document.getElementById("exp-payer").value;
-      var split = Array.prototype.slice.call(root.querySelectorAll("[data-split-toggle]"))
-        .filter(function(b){ return b.classList.contains("selected"); })
-        .map(function(b){ return b.dataset.splitToggle; });
-      if (!desc || amount <= 0 || !payer || !split.length) return;
-      if (existing){
-        existing.description = desc; existing.amountCents = amount; existing.paidBy = payer; existing.splitAmong = split;
-        logActivity('edited expense "' + desc + '"', "money");
-      } else {
-        state.expenses.push({ id: uid("exp"), description:desc, amountCents:amount, paidBy:payer, splitAmong:split, ts:Date.now() });
-        logActivity('added expense "' + desc + '" (' + fmtCents(amount) + '), paid by ' + participantName(payer), "money");
+
+    var payer = existing ? existing.paidBy : myId();
+    var splitAmong = existing ? existing.splitAmong.slice() : state.participants.map(function(p){ return p.id; });
+    var splitMode = existing ? (existing.splitMode || "equal") : "equal";
+    var splitValues = existing ? JSON.parse(JSON.stringify(existing.splitValues || {})) : {};
+    var category = existing ? (existing.category || "Other") : "Other";
+    var descValue = existing ? existing.description : "";
+    var amountValue = existing ? (existing.amountCents / 100).toFixed(2) : "";
+
+    function captureFieldValues(){
+      var d = document.getElementById("exp-desc");
+      var a = document.getElementById("exp-amount");
+      if (d) descValue = d.value;
+      if (a) amountValue = a.value;
+    }
+
+    function currentAmountCents(){
+      var input = document.getElementById("exp-amount");
+      return input ? dollarsToCents(input.value) : 0;
+    }
+
+    function splitFeedbackHtml(){
+      var amt = currentAmountCents();
+      if (splitMode === "exact"){
+        var sum = splitAmong.reduce(function(s, id){ return s + Math.round((splitValues[id] || 0) * 100); }, 0);
+        var remaining = amt - sum;
+        var ok = remaining === 0;
+        return '<div style="font-size:12.5px;font-weight:600;color:' + (ok ? "var(--good)" : "var(--bad)") + ';margin-top:8px;">' +
+          (ok ? "✓ Fully assigned" : (remaining > 0 ? fmtCents(remaining) + " left to assign" : fmtCents(-remaining) + " over the total")) +
+        '</div>';
       }
-      root.innerHTML = "";
-      scheduleSave();
-    };
+      if (splitMode === "percent"){
+        var sumPct = splitAmong.reduce(function(s, id){ return s + (splitValues[id] || 0); }, 0);
+        var ok2 = Math.round(sumPct * 100) === 10000;
+        return '<div style="font-size:12.5px;font-weight:600;color:' + (ok2 ? "var(--good)" : "var(--bad)") + ';margin-top:8px;">' +
+          sumPct.toFixed(1) + '% assigned' + (ok2 ? " ✓" : " — needs to total 100%") +
+        '</div>';
+      }
+      if (splitMode === "shares"){
+        var portions = computeExpensePortions({ amountCents: amt, splitAmong: splitAmong, splitMode: "shares", splitValues: splitValues });
+        var lines = splitAmong.map(function(id){ return escapeHtml(participantTag(id)) + " " + fmtCents(portions[id] || 0); }).join(" · ");
+        return '<div style="font-size:12.5px;color:var(--text-muted);margin-top:8px;">' + lines + '</div>';
+      }
+      return "";
+    }
+
+    function updateSplitFeedback(){
+      var el = document.getElementById("exp-split-feedback");
+      if (el) el.innerHTML = splitFeedbackHtml();
+    }
+
+    function valueInputsHtml(){
+      if (splitMode === "equal" || !splitAmong.length) return "";
+      var suffix = splitMode === "exact" ? "$" : (splitMode === "percent" ? "%" : "shares");
+      var rows = splitAmong.map(function(id){
+        var p = state.participants.find(function(x){ return x.id === id; });
+        if (!p) return "";
+        var hasVal = splitValues[id] != null;
+        var val = hasVal ? splitValues[id] : (splitMode === "shares" ? 1 : "");
+        return '<div class="split-value-row">' +
+          '<span class="avatar" style="background:' + (p.color || "var(--accent)") + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>' +
+          '<span class="split-value-name">' + escapeHtml(p.name) + '</span>' +
+          '<input type="number" step="any" min="0" data-split-value="' + id + '" value="' + escapeAttr(String(val)) + '" placeholder="' + (splitMode === "shares" ? "1" : "0") + '">' +
+          '<span class="split-value-suffix">' + suffix + '</span>' +
+        '</div>';
+      }).join("");
+      return '<div class="split-value-list">' + rows + '</div><div id="exp-split-feedback"></div>';
+    }
+
+    function paint(){
+      var payerGridHtml = state.participants.map(function(p){
+        return '<button type="button" class="payer-btn' + (p.id === payer ? ' selected' : '') + '" data-payer-pick="' + p.id + '">' +
+          '<span class="avatar" data-tip="' + escapeAttr(p.name) + '" style="background:' + (p.color || "var(--accent)") + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>' +
+          '<span>' + escapeHtml(p.name) + '</span>' +
+        '</button>';
+      }).join("");
+      var splitGridHtml = state.participants.map(function(p){
+        var checked = splitAmong.indexOf(p.id) !== -1;
+        return '<button type="button" class="split-btn' + (checked ? ' selected' : '') + '" data-split-toggle="' + p.id + '">' +
+          '<span class="avatar" data-tip="' + escapeAttr(p.name) + '" style="background:' + (p.color || "var(--accent)") + '">' + escapeHtml(p.tag || initials(p.name)) + '</span>' +
+          '<span>' + escapeHtml(p.name) + '</span>' +
+        '</button>';
+      }).join("");
+      var categoryOptionsHtml = CATEGORIES.map(function(c){
+        return '<option value="' + c.key + '"' + (c.key === category ? " selected" : "") + '>' + c.emoji + ' ' + c.label + '</option>';
+      }).join("");
+      var modeChipsHtml = ["equal", "exact", "percent", "shares"].map(function(mo){
+        return '<button type="button" class="settle-chip' + (mo === splitMode ? " settled" : "") + '" data-split-mode="' + mo + '">' + SPLIT_MODE_LABELS[mo] + '</button>';
+      }).join("");
+
+      root.innerHTML =
+        '<div class="modal-backdrop"><div class="modal modal-wide">' +
+          '<h3>' + (existing ? "Edit" : "Add") + ' expense</h3>' +
+          '<div class="field"><label>Description</label><input type="text" id="exp-desc" value="' + escapeAttr(descValue) + '" placeholder="e.g. Lodging deposit"></div>' +
+          '<div class="grid2">' +
+            '<div class="field"><label>Amount</label><input type="number" step="0.01" id="exp-amount" value="' + escapeAttr(amountValue) + '" placeholder="0.00"></div>' +
+            '<div class="field"><label>Category</label><select id="exp-category">' + categoryOptionsHtml + '</select></div>' +
+          '</div>' +
+          '<div class="field"><label>Who actually paid?</label><div class="payer-grid" id="exp-payer-grid">' + payerGridHtml + '</div></div>' +
+          '<div class="field"><label>Split among</label><div class="split-grid" id="exp-split-grid">' + splitGridHtml + '</div></div>' +
+          '<div class="field"><label>Split method</label><div class="settle-row" id="exp-split-mode-row">' + modeChipsHtml + '</div>' +
+            valueInputsHtml() +
+          '</div>' +
+          '<div class="actions">' +
+            '<button class="btn secondary" id="exp-cancel">Cancel</button>' +
+            '<button class="btn" id="exp-save">Save</button>' +
+          '</div>' +
+        '</div></div>';
+
+      document.getElementById("exp-cancel").onclick = function(){ root.innerHTML = ""; };
+
+      Array.prototype.slice.call(document.getElementById("exp-payer-grid").querySelectorAll("[data-payer-pick]")).forEach(function(btn){
+        btn.onclick = function(){
+          payer = btn.getAttribute("data-payer-pick");
+          document.getElementById("exp-payer-grid").querySelectorAll(".payer-btn").forEach(function(b){ b.classList.remove("selected"); });
+          btn.classList.add("selected");
+        };
+      });
+
+      Array.prototype.slice.call(document.getElementById("exp-split-grid").querySelectorAll("[data-split-toggle]")).forEach(function(btn){
+        btn.onclick = function(){
+          captureFieldValues();
+          var pid = btn.getAttribute("data-split-toggle");
+          var idx = splitAmong.indexOf(pid);
+          if (idx === -1) splitAmong.push(pid); else splitAmong.splice(idx, 1);
+          paint();
+        };
+      });
+
+      Array.prototype.slice.call(document.getElementById("exp-split-mode-row").querySelectorAll("[data-split-mode]")).forEach(function(btn){
+        btn.onclick = function(){
+          captureFieldValues();
+          splitMode = btn.getAttribute("data-split-mode");
+          splitValues = {};
+          paint();
+        };
+      });
+
+      Array.prototype.slice.call(root.querySelectorAll("[data-split-value]")).forEach(function(input){
+        input.addEventListener("input", function(){
+          splitValues[input.getAttribute("data-split-value")] = parseFloat(input.value) || 0;
+          updateSplitFeedback();
+        });
+      });
+
+      document.getElementById("exp-amount").addEventListener("input", updateSplitFeedback);
+      document.getElementById("exp-category").addEventListener("change", function(){
+        category = document.getElementById("exp-category").value;
+      });
+
+      updateSplitFeedback();
+
+      document.getElementById("exp-save").onclick = function(){
+        var desc = document.getElementById("exp-desc").value.trim();
+        var amount = currentAmountCents();
+        if (!desc || amount <= 0 || !payer || !splitAmong.length) return;
+
+        if (splitMode === "exact"){
+          var sum = splitAmong.reduce(function(s, id){ return s + Math.round((splitValues[id] || 0) * 100); }, 0);
+          if (sum !== amount) return;
+        }
+        if (splitMode === "percent"){
+          var sumPct = splitAmong.reduce(function(s, id){ return s + (splitValues[id] || 0); }, 0);
+          if (Math.round(sumPct * 100) !== 10000) return;
+        }
+
+        var cleanValues = {};
+        if (splitMode !== "equal"){
+          splitAmong.forEach(function(id){
+            var raw = splitValues[id];
+            cleanValues[id] = splitMode === "exact" ? Math.round((raw || 0) * 100) : (raw != null ? raw : (splitMode === "shares" ? 1 : 0));
+          });
+        }
+
+        if (existing){
+          var moneyChanged = existing.amountCents !== amount ||
+            existing.paidBy !== payer ||
+            JSON.stringify(existing.splitAmong.slice().sort()) !== JSON.stringify(splitAmong.slice().sort()) ||
+            (existing.splitMode || "equal") !== splitMode ||
+            JSON.stringify(existing.splitValues || {}) !== JSON.stringify(cleanValues);
+          existing.description = desc; existing.amountCents = amount; existing.paidBy = payer;
+          existing.splitAmong = splitAmong; existing.splitMode = splitMode; existing.splitValues = cleanValues;
+          existing.category = category;
+          if (moneyChanged) existing.settledBy = [];
+          logActivity('edited expense "' + desc + '"', "money");
+        } else {
+          state.expenses.push({
+            id: uid("exp"), description: desc, amountCents: amount, paidBy: payer, splitAmong: splitAmong,
+            splitMode: splitMode, splitValues: cleanValues, category: category, settledBy: [], ts: Date.now()
+          });
+          logActivity('added expense "' + desc + '" (' + fmtCents(amount) + '), paid by ' + participantName(payer), "money");
+        }
+        root.innerHTML = "";
+        scheduleSave();
+      };
+    }
+
+    paint();
   }
 
   function deleteExpense(id){
@@ -1288,6 +1526,25 @@
       e.settledBy.splice(idx, 1);
       logActivity(pname + ' marked "' + e.description + '" unsettled', "default");
     }
+    scheduleSave();
+  }
+
+  function recordSettlementPayment(from, to, amountCents){
+    if (blockIfGuest()) return;
+    if (!from || !to || !amountCents) return;
+    if (!state.settlementLog) state.settlementLog = [];
+    state.settlementLog.push({ id: uid("pay"), from: from, to: to, amountCents: amountCents, ts: Date.now() });
+    logActivity(participantName(from) + " paid " + participantName(to) + " " + fmtCents(amountCents), "money");
+    scheduleSave();
+  }
+
+  function deleteSettlementPayment(id){
+    if (blockIfGuest()) return;
+    var idx = (state.settlementLog || []).findIndex(function(p){ return p.id === id; });
+    if (idx === -1) return;
+    var p = state.settlementLog[idx];
+    state.settlementLog.splice(idx, 1);
+    logActivity("undid " + participantName(p.from) + " → " + participantName(p.to) + " " + fmtCents(p.amountCents), "remove");
     scheduleSave();
   }
 
@@ -2064,6 +2321,9 @@
     state.activity.forEach(function(a){ tallies[a.who] = (tallies[a.who] || 0) + 1; });
     var mvpName = null, mvpCount = 0;
     Object.keys(tallies).forEach(function(name){ if (tallies[name] > mvpCount){ mvpCount = tallies[name]; mvpName = name; } });
+    var catTotals = categoryTotals();
+    var topCat = CATEGORIES.filter(function(c){ return catTotals[c.key] > 0; })
+      .sort(function(a, b){ return catTotals[b.key] - catTotals[a.key]; })[0];
 
     var html = '<div class="section-head" style="margin-top:22px;"><div><h2 style="font-size:17px;">📊 Trip Stats</h2></div></div>';
     html += '<div class="stats-grid">';
@@ -2072,9 +2332,9 @@
     html += statTile(fmtCents(totalSpentCents), "Total spent");
     html += statTile(fmtCents(avgCents), "Avg. per person");
     html += statTile(biggest ? fmtCents(biggest.amountCents) : "—", biggest ? "Biggest: " + truncateText(biggest.description, 18) : "Biggest expense");
+    html += statTile(topCat ? topCat.emoji + " " + topCat.label : "—", topCat ? "Top category · " + fmtCents(catTotals[topCat.key]) : "Top category");
     html += statTile(totalComments, "Comments posted");
     html += statTile(mvpName || "—", "MVP (most active)");
-    html += statTile(state.gear.length + state.glossary.length, "Jerry School entries");
     html += '</div>';
     return html;
   }
@@ -2098,6 +2358,41 @@
       };
       wikiCache[query] = result;
       return result;
+    });
+  }
+
+  var weatherCache = {};
+
+  function weatherIcon(code){
+    if (code === 0) return "☀️";
+    if (code === 1 || code === 2) return "🌤️";
+    if (code === 3) return "☁️";
+    if (code >= 45 && code <= 48) return "🌫️";
+    if (code >= 51 && code <= 67) return "🌧️";
+    if (code >= 71 && code <= 77) return "❄️";
+    if (code >= 80 && code <= 82) return "🌦️";
+    if (code >= 85 && code <= 86) return "🌨️";
+    if (code >= 95) return "⛈️";
+    return "🌡️";
+  }
+
+  function fetchWeather(destinationName){
+    if (weatherCache[destinationName]) return Promise.resolve(weatherCache[destinationName]);
+    var geoUrl = "https://geocoding-api.open-meteo.com/v1/search?count=1&name=" + encodeURIComponent(destinationName);
+    return fetch(geoUrl).then(function(r){ return r.json(); }).then(function(geo){
+      var place = geo && geo.results && geo.results[0];
+      if (!place) throw new Error("no location found");
+      var wxUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + place.latitude + "&longitude=" + place.longitude +
+        "&daily=temperature_2m_max,temperature_2m_min,weathercode&temperature_unit=fahrenheit&timezone=auto&forecast_days=1";
+      return fetch(wxUrl).then(function(r){ return r.json(); }).then(function(wx){
+        var result = {
+          high: Math.round(wx.daily.temperature_2m_max[0]),
+          low: Math.round(wx.daily.temperature_2m_min[0]),
+          icon: weatherIcon(wx.daily.weathercode[0])
+        };
+        weatherCache[destinationName] = result;
+        return result;
+      });
     });
   }
 
@@ -2190,6 +2485,40 @@
     hideHoverFlag();
   });
 
+  function renderDestinationTile(item, hoverAttrs){
+    var label = '<div class="meta" style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Leading destination</div>';
+    if (!item){
+      return '<div class="card">' + label + '<div style="color:var(--text-muted);font-size:13.5px;">No votes yet</div></div>';
+    }
+    var nameHtml = item.url
+      ? '<a class="dest-name-link" href="' + escapeAttr(item.url) + '" target="_blank" rel="noopener">' + escapeHtml(item.name) + '</a>'
+      : '<div style="font-family:var(--font-head);font-weight:700;font-size:18px;">' + escapeHtml(item.name) + '</div>';
+    var weatherUrl = "https://www.google.com/search?q=" + encodeURIComponent("weather in " + item.name);
+    return '<div class="card"' + (hoverAttrs || "") + '>' + label +
+      '<div class="dest-tile-row">' +
+        '<div>' + nameHtml + '<div style="color:var(--text-muted);font-size:12.5px;margin-top:2px;">' + item.votes.length + ' vote' + (item.votes.length === 1 ? "" : "s") + '</div></div>' +
+        '<a class="dest-weather" id="dest-weather" data-weather-for="' + escapeAttr(item.name) + '" href="' + escapeAttr(weatherUrl) + '" target="_blank" rel="noopener" title="See weather for ' + escapeAttr(item.name) + '">' +
+          '<span class="dest-weather-icon" id="dest-weather-icon">⋯</span>' +
+          '<span class="dest-weather-temp" id="dest-weather-temp">--°/--°</span>' +
+        '</a>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function loadDestinationWeather(destinationName){
+    fetchWeather(destinationName).then(function(wx){
+      var el = document.getElementById("dest-weather");
+      if (!el || el.getAttribute("data-weather-for") !== destinationName) return;
+      document.getElementById("dest-weather-icon").textContent = wx.icon;
+      document.getElementById("dest-weather-temp").textContent = wx.high + "°/" + wx.low + "°";
+    }).catch(function(){
+      var el = document.getElementById("dest-weather");
+      if (!el || el.getAttribute("data-weather-for") !== destinationName) return;
+      document.getElementById("dest-weather-icon").textContent = "—";
+      document.getElementById("dest-weather-temp").textContent = "";
+    });
+  }
+
   function renderOverview(){
     function leader(listKey){
       var list = state[listKey];
@@ -2212,9 +2541,9 @@
     var destHoverAttrs = locLeader ? ' data-hover="destination" data-hover-name="' + escapeAttr(locLeader.name) + '" style="cursor:help;"' : "";
     var datesHoverAttrs = dateLeader ? ' data-hover="dates" data-hover-start="' + escapeAttr(dateLeader.start) + '" data-hover-end="' + escapeAttr(dateLeader.end) + '" style="cursor:help;"' : "";
 
-    var html = '<div class="section-head"><div><h2>Overview</h2><p>The state of the mission.</p></div></div>';
+    var html = '<div class="section-head"><div><h2>Overview</h2></div></div>';
     html += renderCountdown(dateLeader);
-    html += '<div class="grid2">' + tile("Leading destination", locLeader, null, destHoverAttrs) + tile("Leading dates", dateLeader, dateLeader ? fmtDateRange(dateLeader.start, dateLeader.end) : null, datesHoverAttrs) + '</div>';
+    html += '<div class="grid2">' + renderDestinationTile(locLeader, destHoverAttrs) + tile("Leading dates", dateLeader, dateLeader ? fmtDateRange(dateLeader.start, dateLeader.end) : null, datesHoverAttrs) + '</div>';
     html += '<div class="grid2" style="margin-top:0;">' + tile("Leading lodging", lodgeLeader) +
       '<div class="card"><div class="meta" style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Trip spend so far</div>' +
       '<div class="mono" style="font-size:18px;font-weight:600;">' + fmtCents(totalCents) + '</div>' +
@@ -2226,6 +2555,7 @@
     html += renderCrew();
 
     document.getElementById("panel-overview").innerHTML = html;
+    if (locLeader) loadDestinationWeather(locLeader.name);
   }
 
   function renderCrew(){
@@ -2246,26 +2576,33 @@
   function expenseContribution(e, personId){
     if (!e.splitAmong.length) return 0;
     var settled = e.settledBy || [];
-    var share = Math.floor(e.amountCents / e.splitAmong.length);
-    var remainder = e.amountCents - share * e.splitAmong.length;
+    var portions = computeExpensePortions(e);
     var contribution = 0;
-    e.splitAmong.forEach(function(pid, i){
+    e.splitAmong.forEach(function(pid){
       if (pid === e.paidBy) return;
       if (settled.indexOf(pid) !== -1) return;
-      var portion = share + (i < remainder ? 1 : 0);
+      var portion = portions[pid] || 0;
       if (pid === personId) contribution -= portion;
       if (e.paidBy === personId) contribution += portion;
     });
     return contribution;
   }
 
-  function renderBalanceBreakdown(personId){
+  function renderBalanceBreakdown(personId, settlements){
+    var name = participantName(personId);
     var lines = [];
     state.expenses.forEach(function(e){
       var c = expenseContribution(e, personId);
       if (c === 0) return;
-      var role = e.paidBy === personId ? "you paid, owed back" : "your share";
+      var role = e.paidBy === personId ? name + " paid, owed back" : name + "'s share";
       lines.push({ desc: e.description, role: role, cents: c });
+    });
+    (state.settlementLog || []).forEach(function(p){
+      if (p.from === personId){
+        lines.push({ desc: "Paid " + participantName(p.to), role: "settle-up", cents: p.amountCents });
+      } else if (p.to === personId){
+        lines.push({ desc: "Received from " + participantName(p.from), role: "settle-up", cents: -p.amountCents });
+      }
     });
     if (!lines.length){
       return '<div class="balance-breakdown"><div class="empty" style="padding:10px;">No expenses touch this balance.</div></div>';
@@ -2276,7 +2613,79 @@
       return '<div class="breakdown-row"><span class="breakdown-desc">' + escapeHtml(l.desc) + ' <span class="breakdown-role">(' + l.role + ')</span></span>' +
         '<span class="mono breakdown-amt ' + cls + '">' + sign + fmtCents(Math.abs(l.cents)) + '</span></div>';
     }).join("");
-    return '<div class="balance-breakdown">' + rows + '</div>';
+    var totalCents = lines.reduce(function(s, l){ return s + l.cents; }, 0);
+    var totalCls = totalCents > 0 ? "owed" : (totalCents < 0 ? "owes" : "");
+    var totalLabel = totalCents > 0 ? name + " is owed" : (totalCents < 0 ? name + " owes" : name + " is settled up");
+    var totalSign = totalCents > 0 ? "+" : (totalCents < 0 ? "−" : "");
+    var totalRow = '<div class="breakdown-total"><span class="breakdown-desc">' + totalLabel + '</span>' +
+      '<span class="mono breakdown-amt ' + totalCls + '">' + totalSign + fmtCents(Math.abs(totalCents)) + '</span></div>';
+
+    var whoHtml = "";
+    if (settlements){
+      var pays = settlements.filter(function(s){ return s.from === personId; });
+      var receives = settlements.filter(function(s){ return s.to === personId; });
+      if (pays.length){
+        whoHtml += pays.map(function(s){
+          return '<div class="breakdown-row"><span class="breakdown-desc">💸 ' + name + ' pays <strong>' + escapeHtml(participantName(s.to)) + '</strong></span>' +
+            '<span class="mono breakdown-amt owes">' + fmtCents(s.amount) + '</span></div>' +
+            '<div style="text-align:right;margin:2px 0 6px;"><button class="settle-chip" data-mark-paid-from="' + s.from + '" data-mark-paid-to="' + s.to + '" data-mark-paid-amt="' + s.amount + '">✓ Mark as paid</button></div>';
+        }).join("");
+      }
+      if (receives.length){
+        whoHtml += receives.map(function(s){
+          return '<div class="breakdown-row"><span class="breakdown-desc">💸 ' + name + ' collects from <strong>' + escapeHtml(participantName(s.from)) + '</strong></span>' +
+            '<span class="mono breakdown-amt owed">' + fmtCents(s.amount) + '</span></div>' +
+            '<div style="text-align:right;margin:2px 0 6px;"><button class="settle-chip" data-mark-paid-from="' + s.from + '" data-mark-paid-to="' + s.to + '" data-mark-paid-amt="' + s.amount + '">✓ Mark as received</button></div>';
+        }).join("");
+      }
+      if (whoHtml) whoHtml = '<div class="breakdown-who">' + whoHtml + '</div>';
+    }
+
+    return '<div class="balance-breakdown">' + rows + totalRow + whoHtml + '</div>';
+  }
+
+  function openMathHelpModal(){
+    var root = document.getElementById("modal-root");
+    root.innerHTML =
+      '<div class="modal-backdrop"><div class="modal modal-wide">' +
+        '<div class="modal-head"><h3>🧮 How the money math works</h3><button class="icon-only" id="math-help-close" title="Close">✕</button></div>' +
+        '<p>Nobody has to trust it blindly — here\'s the whole process, with a simple example.</p>' +
+        '<div style="display:flex;gap:16px;font-size:12.5px;font-weight:600;margin:-6px 0 12px;">' +
+          '<span style="color:var(--good);">● owed = money coming to you</span>' +
+          '<span style="color:var(--bad);">● owes = money you need to pay</span>' +
+        '</div>' +
+        '<div class="math-flow">' +
+          '<div class="math-step">' +
+            '<div class="math-step-num">1</div>' +
+            '<div class="math-step-body">' +
+              '<div class="math-step-title">Every expense gets split into shares</div>' +
+              '<div class="math-step-desc">Say Alex pays <b>$30</b> for pizza, split 3 ways between Alex, Bailey, and Casey. Each person\'s "share" is <b>$10</b>. Bailey and Casey each now <span style="color:var(--bad);font-weight:600;">owe Alex $10</span>.</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="math-arrow">↓</div>' +
+          '<div class="math-step">' +
+            '<div class="math-step-num">2</div>' +
+            '<div class="math-step-body">' +
+              '<div class="math-step-title">We add up every expense, for every person</div>' +
+              '<div class="math-step-desc">Now Bailey pays <b>$15</b> for drinks, split 3 ways — each share is <b>$5</b>. Adding both expenses together per person:' +
+                '<br>• <b>Alex</b>: <span style="color:var(--good);font-weight:600;">is owed $20</span> for pizza, <span style="color:var(--bad);font-weight:600;">owes $5</span> for drinks → net <span class="mono" style="color:var(--good);font-weight:700;">+$15 (is owed)</span>' +
+                '<br>• <b>Bailey</b>: <span style="color:var(--bad);font-weight:600;">owes $10</span> for pizza, <span style="color:var(--good);font-weight:600;">is owed $10</span> for drinks → net <b>$0</b> (already even!)' +
+                '<br>• <b>Casey</b>: <span style="color:var(--bad);font-weight:600;">owes $10</span> for pizza, <span style="color:var(--bad);font-weight:600;">owes $5</span> for drinks → net <span class="mono" style="color:var(--bad);font-weight:700;">−$15 (owes)</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="math-arrow">↓</div>' +
+          '<div class="math-step">' +
+            '<div class="math-step-num">3</div>' +
+            '<div class="math-step-body">' +
+              '<div class="math-step-title">We simplify to the fewest payments possible</div>' +
+              '<div class="math-step-desc">Instead of 4 separate reimbursements bouncing around, the app nets it all out: <b>Casey</b> (who <span style="color:var(--bad);font-weight:700;">owes</span>) <b>just pays Alex $15</b>, once — Alex is the one who <span style="color:var(--good);font-weight:700;">is owed</span>. Bailey doesn\'t pay or collect anything — they already broke even.</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<p style="margin-top:14px;margin-bottom:0;">That\'s the exact same process behind every number on this tab. Tap any name under "Suggested settle-up," or any balance card, to see this same math done with your real expenses.</p>' +
+      '</div></div>';
+    document.getElementById("math-help-close").onclick = function(){ root.innerHTML = ""; };
   }
 
   function renderBudget(){
@@ -2284,7 +2693,7 @@
     var settlements = computeSettlements(bal);
     var totalSpentCents = state.expenses.reduce(function(s,e){ return s + e.amountCents; }, 0);
     var outstandingCents = Object.keys(bal).reduce(function(s,id){ return s + Math.max(bal[id], 0); }, 0);
-    var html = '<div class="section-head"><div><h2>Expenses</h2><p>Log what you paid for — we\'ll do the awkward math so you don\'t have to.</p></div><button class="btn" id="add-expense">+ Add expense</button></div>';
+    var html = '<div class="section-head"><div><h2>Expenses</h2><p>Log what you paid for — we\'ll do the awkward math so you don\'t have to. <button class="math-help-link" id="math-help-open">🧮 How does this math work?</button></p></div><button class="btn" id="add-expense">+ Add expense</button></div>';
 
     html += '<div class="grid2" style="margin-bottom:14px;">' +
       '<div class="card"><div class="meta" style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Total spent</div><div class="mono" style="font-size:18px;font-weight:600;">' + fmtCents(totalSpentCents) + '</div></div>' +
@@ -2304,7 +2713,7 @@
           '<span class="balance-pill ' + cls + '">' + (v === 0 ? "$0.00" : (v > 0 ? "+" : "−") + fmtCents(Math.abs(v))) + '</span>' +
           '<span class="balance-caret">' + (isOpen ? "▾" : "▸") + '</span>' +
         '</div>' +
-        (isOpen ? renderBalanceBreakdown(p.id) : "") +
+        (isOpen ? renderBalanceBreakdown(p.id, settlements) : "") +
       '</div>';
     });
     html += '</div>';
@@ -2313,18 +2722,26 @@
     if (!settlements.length){
       html += '<div style="color:var(--text-muted);font-size:13px;">Everyone\'s square — nobody owes anybody anything.</div>';
     } else {
+      html += '<div style="color:var(--text-muted);font-size:12px;margin-bottom:8px;">Tap anyone to see exactly which expenses add up to that number.</div>';
       settlements.forEach(function(s){
-        html += '<div class="flow-card">' +
+        var isOpen = !!expandedBalances[s.from];
+        html += '<div class="flow-card" data-settleflow-toggle="' + s.from + '" style="cursor:pointer;">' +
           '<span class="avatar" data-tip="' + escapeAttr(participantName(s.from)) + '" style="background:' + participantColor(s.from) + '">' + escapeHtml(participantTag(s.from)) + '</span>' +
           '<span class="flow-name">' + escapeHtml(participantName(s.from)) + '</span>' +
           '<span class="flow-arrow">→</span>' +
           '<span class="avatar" data-tip="' + escapeAttr(participantName(s.to)) + '" style="background:' + participantColor(s.to) + '">' + escapeHtml(participantTag(s.to)) + '</span>' +
           '<span class="flow-name">' + escapeHtml(participantName(s.to)) + '</span>' +
           '<span class="flow-amount mono">' + fmtCents(s.amount) + '</span>' +
-        '</div>';
+          '<span class="balance-caret" style="margin-left:2px;">' + (isOpen ? "▾" : "▸") + '</span>' +
+        '</div>' +
+        (isOpen ? renderBalanceBreakdown(s.from, settlements) : "");
       });
     }
     html += '</div>';
+
+    html += renderSettlementLog();
+
+    html += renderCategoryBreakdown();
 
     html += '<div class="section-head" style="margin-top:22px;"><h2 style="font-size:17px;">Expenses</h2></div>';
     if (!state.expenses.length){
@@ -2335,6 +2752,8 @@
         var owers = e.splitAmong.filter(function(pid){ return pid !== e.paidBy; });
         var allSettled = owers.length > 0 && owers.every(function(pid){ return settled.indexOf(pid) !== -1; });
         var payerColor = participantColor(e.paidBy);
+        var catMeta = categoryMeta(e.category || "Other");
+        var modeLabel = e.splitMode && e.splitMode !== "equal" ? " (" + SPLIT_MODE_LABELS[e.splitMode].toLowerCase() + ")" : "";
         var chips = owers.map(function(pid){
           var isSettled = settled.indexOf(pid) !== -1;
           return '<button class="settle-chip' + (isSettled ? ' settled' : '') + '" data-settle-exp="' + e.id + '" data-settle-person="' + pid + '">' +
@@ -2344,8 +2763,8 @@
           '<div class="vote-row">' +
           '<span class="avatar" data-tip="' + escapeAttr(participantName(e.paidBy)) + ' paid" style="background:' + payerColor + '">' + escapeHtml(participantTag(e.paidBy)) + '</span>' +
           '<div class="info">' +
-          '<div class="name">' + escapeHtml(e.description) + (allSettled ? ' <span class="balance-pill even" style="margin-left:6px;">all settled</span>' : '') + '</div>' +
-          '<div class="meta"><strong>' + escapeHtml(participantName(e.paidBy)) + '</strong> paid · split ' + e.splitAmong.length + ' way' + (e.splitAmong.length===1?"":"s") + '</div>' +
+          '<div class="name">' + catMeta.emoji + ' ' + escapeHtml(e.description) + (allSettled ? ' <span class="balance-pill even" style="margin-left:6px;">all settled</span>' : '') + '</div>' +
+          '<div class="meta"><strong>' + escapeHtml(participantName(e.paidBy)) + '</strong> paid · split ' + e.splitAmong.length + ' way' + (e.splitAmong.length===1?"":"s") + modeLabel + '</div>' +
           (owers.length ? '<div class="settle-row">' + chips + '</div>' : '') +
           '</div><div class="amt mono" style="font-weight:600;font-size:15px;min-width:80px;">' + fmtCents(e.amountCents) + '</div>' +
           '<div class="row-actions"><button class="icon-only" data-editexp="' + e.id + '" title="Edit">✎</button><button class="icon-only" data-delexp="' + e.id + '" title="Delete">✕</button></div>' +
@@ -2353,6 +2772,46 @@
       });
     }
     document.getElementById("panel-budget").innerHTML = html;
+  }
+
+  function categoryTotals(){
+    var totals = {};
+    CATEGORIES.forEach(function(c){ totals[c.key] = 0; });
+    state.expenses.forEach(function(e){
+      var key = e.category && totals.hasOwnProperty(e.category) ? e.category : "Other";
+      totals[key] += e.amountCents;
+    });
+    return totals;
+  }
+
+  function renderCategoryBreakdown(){
+    var totals = categoryTotals();
+    var cats = CATEGORIES.filter(function(c){ return totals[c.key] > 0; })
+      .sort(function(a, b){ return totals[b.key] - totals[a.key]; });
+    if (!cats.length) return "";
+    var rows = cats.map(function(c){
+      return '<div class="flow-card"><span style="font-size:16px;flex:none;">' + c.emoji + '</span>' +
+        '<span class="flow-name">' + c.label + '</span>' +
+        '<span class="flow-amount mono">' + fmtCents(totals[c.key]) + '</span></div>';
+    }).join("");
+    return '<div class="card" style="margin-top:14px;"><div style="font-weight:600;font-size:13.5px;margin-bottom:10px;">📊 Spend by category</div>' + rows + '</div>';
+  }
+
+  function renderSettlementLog(){
+    var log = state.settlementLog || [];
+    if (!log.length) return "";
+    var rows = log.slice().reverse().map(function(p){
+      return '<div class="flow-card">' +
+        '<span class="avatar" data-tip="' + escapeAttr(participantName(p.from)) + '" style="background:' + participantColor(p.from) + '">' + escapeHtml(participantTag(p.from)) + '</span>' +
+        '<span class="flow-name">' + escapeHtml(participantName(p.from)) + '</span>' +
+        '<span class="flow-arrow">→</span>' +
+        '<span class="avatar" data-tip="' + escapeAttr(participantName(p.to)) + '" style="background:' + participantColor(p.to) + '">' + escapeHtml(participantTag(p.to)) + '</span>' +
+        '<span class="flow-name">' + escapeHtml(participantName(p.to)) + '</span>' +
+        '<span class="flow-amount mono">' + fmtCents(p.amountCents) + '</span>' +
+        '<button class="icon-only" data-undo-payment="' + p.id + '" title="Undo this">✕</button>' +
+      '</div>';
+    }).join("");
+    return '<div class="card" style="margin-top:14px;"><div style="font-weight:600;font-size:13.5px;margin-bottom:10px;">✅ Recorded payments</div>' + rows + '</div>';
   }
 
   function activityFeedHtml(){
@@ -2652,6 +3111,10 @@
     document.querySelectorAll(".panel").forEach(function(p){
       p.classList.toggle("active", p.id === "panel-" + key);
     });
+    if (key === "budget" && !hasSeenMathHelp()){
+      markMathHelpSeen();
+      openMathHelpModal();
+    }
   }
   document.addEventListener("click", function(e){
     var btn = e.target.closest("[data-tab]");
@@ -2791,16 +3254,31 @@
         return;
       }
       if (t.closest("#add-expense")){ openExpenseModal(); return; }
+      if (t.closest("#math-help-open")){ openMathHelpModal(); return; }
       var editExp = t.closest("[data-editexp]");
       if (editExp){ openExpenseModal(editExp.dataset.editexp); return; }
       var delExp = t.closest("[data-delexp]");
       if (delExp){ deleteExpense(delExp.dataset.delexp); return; }
       var settleBtn = t.closest("[data-settle-exp]");
       if (settleBtn){ toggleSettled(settleBtn.dataset.settleExp, settleBtn.dataset.settlePerson); return; }
+      var markPaid = t.closest("[data-mark-paid-from]");
+      if (markPaid){
+        recordSettlementPayment(markPaid.dataset.markPaidFrom, markPaid.dataset.markPaidTo, parseInt(markPaid.dataset.markPaidAmt, 10));
+        return;
+      }
+      var undoPayment = t.closest("[data-undo-payment]");
+      if (undoPayment){ deleteSettlementPayment(undoPayment.dataset.undoPayment); return; }
       var balanceToggle = t.closest("[data-balance-toggle]");
       if (balanceToggle){
         var bid = balanceToggle.dataset.balanceToggle;
         expandedBalances[bid] = !expandedBalances[bid];
+        renderBudget();
+        return;
+      }
+      var settleflowToggle = t.closest("[data-settleflow-toggle]");
+      if (settleflowToggle){
+        var sfid = settleflowToggle.dataset.settleflowToggle;
+        expandedBalances[sfid] = !expandedBalances[sfid];
         renderBudget();
         return;
       }
@@ -2962,11 +3440,15 @@
     state.expenses.forEach(function(e){
       e.splitAmong = e.splitAmong || [];
       e.settledBy = e.settledBy || [];
+      e.splitMode = e.splitMode || "equal";
+      e.splitValues = e.splitValues || {};
+      e.category = e.category || "Other";
     });
     if (!state.activity) state.activity = [];
     if (!state.featureRequests) state.featureRequests = [];
     state.featureRequests.forEach(function(r){ r.votes = r.votes || []; });
     if (!state.chat) state.chat = [];
+    if (!state.settlementLog) state.settlementLog = [];
     if (!state.gear) state.gear = JSON.parse(JSON.stringify(DEFAULT_STATE.gear));
     if (!state.glossary) state.glossary = JSON.parse(JSON.stringify(DEFAULT_STATE.glossary));
   }
