@@ -274,10 +274,19 @@
   }
   .chat-panel{
     position:fixed; right:16px; bottom:126px; z-index:56;
-    width:min(320px, calc(100vw - 32px)); max-height:min(60vh, 440px);
+    width:min(320px, calc(100vw - 32px)); height:min(440px, calc(100vh - 150px));
+    min-width:280px; min-height:280px;
+    max-width:calc(100vw - 32px); max-height:calc(100vh - 150px);
     background:var(--surface); border:1px solid var(--border); border-radius:8px;
     box-shadow:0 20px 50px rgba(0,0,0,.3); display:flex; flex-direction:column; overflow:hidden;
   }
+  .chat-resize-handle{
+    position:absolute; top:0; left:0; width:16px; height:16px; z-index:2; cursor:nwse-resize;
+    background:
+      linear-gradient(135deg, transparent 0 40%, var(--text-muted) 40% 46%, transparent 46% 60%, var(--text-muted) 60% 66%, transparent 66% 100%);
+    opacity:.6;
+  }
+  .chat-resize-handle:hover{opacity:1;}
   .chat-head{
     display:flex; align-items:center; justify-content:space-between; padding:12px 14px;
     border-bottom:1px solid var(--border); font-family:var(--font-head); font-weight:700; font-size:15px; flex:none;
@@ -619,6 +628,7 @@
 
 <button id="chat-fab" class="chat-fab" title="Trip chat">💬<span id="chat-badge" class="chat-badge hidden"></span></button>
 <div id="chat-panel" class="chat-panel hidden">
+  <div class="chat-resize-handle" id="chat-resize-handle" title="Drag to resize"></div>
   <div class="chat-head">
     <span>💬 Trip Chat</span>
     <button class="icon-only" id="chat-minimize" title="Minimize">✕</button>
@@ -3201,6 +3211,32 @@
   document.getElementById("chat-input").addEventListener("keydown", function(e){
     if (e.key === "Enter"){ e.preventDefault(); document.getElementById("chat-send").click(); }
   });
+
+  (function setupChatResize(){
+    var handle = document.getElementById("chat-resize-handle");
+    var panel = document.getElementById("chat-panel");
+    var dragging = false;
+    var startX, startY, startW, startH;
+    handle.addEventListener("pointerdown", function(e){
+      dragging = true;
+      startX = e.clientX; startY = e.clientY;
+      var rect = panel.getBoundingClientRect();
+      startW = rect.width; startH = rect.height;
+      handle.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    handle.addEventListener("pointermove", function(e){
+      if (!dragging) return;
+      var newW = startW + (startX - e.clientX);
+      var newH = startH + (startY - e.clientY);
+      var maxW = window.innerWidth - 32;
+      var maxH = window.innerHeight - 150;
+      panel.style.width = Math.max(280, Math.min(maxW, newW)) + "px";
+      panel.style.height = Math.max(280, Math.min(maxH, newH)) + "px";
+    });
+    handle.addEventListener("pointerup", function(){ dragging = false; });
+    handle.addEventListener("pointercancel", function(){ dragging = false; });
+  })();
 
   document.getElementById("theme-toggle").addEventListener("click", function(){
     var root = document.documentElement;
