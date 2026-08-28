@@ -920,6 +920,15 @@
   function clearGuest(){
     try { localStorage.removeItem(GUEST_KEY); } catch(e){}
   }
+
+  var GUEST_SESSION_KEY = "skitrip2027_guest_session_id";
+  function guestSessionId(){
+    try {
+      var id = localStorage.getItem(GUEST_SESSION_KEY);
+      if (!id){ id = uid("guest"); localStorage.setItem(GUEST_SESSION_KEY, id); }
+      return id;
+    } catch(e){ return "guest-anon"; }
+  }
   function blockIfGuest(){
     if (!isGuest()) return false;
     showBanner("You're viewing as a guest — pick your name (top right) to make changes.");
@@ -1057,6 +1066,9 @@
   function selectIdentity(id){
     var p = state.participants.find(function(x){ return x.id === id; });
     if (!p) return;
+    var oldMe = me();
+    if (oldMe) db.ref("presence/" + oldMe.id).remove();
+    if (isGuest()) db.ref("presence/" + guestSessionId()).remove();
     clearGuest();
     setMyId(id);
     document.getElementById("modal-root").innerHTML = "";
@@ -1066,9 +1078,12 @@
   }
 
   function continueAsGuest(){
+    var oldMe = me();
+    if (oldMe) db.ref("presence/" + oldMe.id).remove();
     setGuest();
     document.getElementById("modal-root").innerHTML = "";
     renderAll();
+    registerPresence();
   }
 
   // ---------- voting ----------
@@ -3044,14 +3059,23 @@
   var presenceConnected = false;
 
   function registerPresence(){
+    if (!presenceConnected) return;
     var m = me();
-    if (!m || !presenceConnected) return;
-    var myPresRef = db.ref("presence/" + m.id);
-    myPresRef.onDisconnect().remove();
-    myPresRef.set({
-      name: m.name, tag: m.tag || "", color: m.color || "",
-      ts: firebase.database.ServerValue.TIMESTAMP
-    });
+    if (m){
+      var myPresRef = db.ref("presence/" + m.id);
+      myPresRef.onDisconnect().remove();
+      myPresRef.set({
+        name: m.name, tag: m.tag || "", color: m.color || "",
+        ts: firebase.database.ServerValue.TIMESTAMP
+      });
+    } else if (isGuest()){
+      var guestPresRef = db.ref("presence/" + guestSessionId());
+      guestPresRef.onDisconnect().remove();
+      guestPresRef.set({
+        name: "Guest", tag: "👀", color: "var(--text-muted)", isGuest: true,
+        ts: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
   }
 
   function setupPresence(){
@@ -3074,7 +3098,7 @@
       return;
     }
     el.classList.remove("hidden");
-    var mine = myId();
+    var mine = myId() || (isGuest() ? guestSessionId() : null);
     var people = ids.map(function(id){
       var p = presenceMap[id];
       return { id: id, name: p.name, tag: p.tag, color: p.color };
