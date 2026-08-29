@@ -1656,11 +1656,15 @@
     var avatarsHtml = item.votes.slice(0,6).map(function(pid){
       return '<span class="avatar" data-tip="' + escapeAttr(participantName(pid)) + '" style="background:' + participantColor(pid) + '">' + escapeHtml(participantTag(pid)) + '</span>';
     }).join("");
-    var hasPhoto = listKey === "lodging" && item.url;
-    var photoHtml = hasPhoto
-      ? '<img class="lodging-photo" src="' + escapeAttr(linkPreviewImg(item.url)) + '" alt="" loading="lazy" onerror="this.remove()">'
-      : "";
-    return '<div class="card' + (hasPhoto ? " has-photo" : "") + '" draggable="true" data-drag-id="' + item.id + '">' +
+    var hasLodgingPhoto = listKey === "lodging" && item.url;
+    var isDestination = listKey === "locations";
+    var photoHtml = "";
+    if (hasLodgingPhoto){
+      photoHtml = '<img class="lodging-photo" src="' + escapeAttr(linkPreviewImg(item.url)) + '" alt="" loading="lazy" onerror="this.remove()">';
+    } else if (isDestination){
+      photoHtml = '<img class="lodging-photo" data-dest-photo="' + item.id + '" alt="" loading="lazy" style="display:none;">';
+    }
+    return '<div class="card' + (hasLodgingPhoto ? " has-photo" : "") + '" draggable="true" data-drag-id="' + item.id + '">' +
       photoHtml +
       '<div class="card-body">' +
       '<div class="vote-row">' +
@@ -1696,6 +1700,25 @@
       });
     }
     document.getElementById("panel-" + listKey).innerHTML = html;
+    if (listKey === "locations") loadDestinationPhotos();
+  }
+
+  function loadDestinationPhotos(){
+    document.querySelectorAll("[data-dest-photo]").forEach(function(img){
+      var id = img.getAttribute("data-dest-photo");
+      var item = state.locations.find(function(l){ return l.id === id; });
+      if (!item) return;
+      var query = item.name.replace(/,\s*[A-Za-z]{2,}$/, "") + " ski resort";
+      fetchWikiSummary(query).then(function(res){
+        if (!res.thumb) return;
+        var freshImg = document.querySelector('[data-dest-photo="' + id + '"]');
+        if (!freshImg) return;
+        freshImg.src = res.thumb;
+        freshImg.style.display = "block";
+        var card = freshImg.closest(".card");
+        if (card) card.classList.add("has-photo");
+      }).catch(function(){});
+    });
   }
 
   // ---------- itinerary (days + timed moments) ----------
